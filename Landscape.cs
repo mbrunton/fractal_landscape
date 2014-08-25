@@ -11,57 +11,26 @@ namespace Project1
     class Landscape : ColoredGameObject
     {
         private HeightMap heightMap;
-
-
+        private int mapGridSize;
+        private List<float> mapCornerHeights;
+        private List<float> mapRandRange;
+        private float minX, maxX, minZ, maxZ;
+        
         public Landscape(Game game)
         {
-            int heightMapSide = 9;
-            List<float> corners = new List<float> {0.0f, 0.0f, 0.0f, 0.0f};
-            List<float> randRange = new List<float> { -50.0f, 50.0f };
-            this.heightMap = new HeightMap(heightMapSide, corners, randRange);
-            Console.WriteLine(this.heightMap);
+            this.mapGridSize = 9;
+            this.mapCornerHeights = new List<float> {0.0f, 0.0f, 0.0f, 0.0f};
+            this.mapRandRange = new List<float> { -50.0f, 50.0f };
+            this.heightMap = new HeightMap(mapGridSize, mapCornerHeights, mapRandRange);
 
+            this.minX = -50;
+            this.maxX = 50;
+            this.minZ = -60;
+            this.maxZ = 60;
+            
             vertices = Buffer.Vertex.New(
                 game.GraphicsDevice,
-                new[]
-                    {
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, -1.0f), Color.Orange), // Front
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, -1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, -1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, -1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, -1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, -1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, 1.0f), Color.Orange), // BACK
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, 1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, 1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, 1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, 1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, 1.0f), Color.Orange),
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, -1.0f), Color.OrangeRed), // Top
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, 1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, 1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, -1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, 1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, -1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, -1.0f), Color.OrangeRed), // Bottom
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, 1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, 1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, -1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, -1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, 1.0f), Color.OrangeRed),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, -1.0f), Color.DarkOrange), // Left
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, 1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, 1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(-1.0f, -1.0f, -1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, 1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(-1.0f, 1.0f, -1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, -1.0f), Color.DarkOrange), // Right
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, 1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, 1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(1.0f, -1.0f, -1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, -1.0f), Color.DarkOrange),
-                        new VertexPositionColor(new Vector3(1.0f, 1.0f, 1.0f), Color.DarkOrange),
-                    });
+                this.heightMap.getVertexList(minX, maxX, minZ, maxZ, getColorFromHeight).ToArray());
 
             basicEffect = new BasicEffect(game.GraphicsDevice)
             {
@@ -92,6 +61,12 @@ namespace Project1
             // Apply the basic effect technique and draw the rotating cube
             basicEffect.CurrentTechnique.Passes[0].Apply();
             game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
+        }
+
+        public Color getColorFromHeight(float z)
+        {
+            // TODO
+            return Color.Orange;
         }
     }
 }
