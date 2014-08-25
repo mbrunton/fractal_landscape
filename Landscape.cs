@@ -9,9 +9,14 @@ namespace Project1
 {
     using SharpDX.Toolkit.Graphics;
     class Landscape : ColoredGameObject
-    {  
+    {
+        private HeightMap heightMap;
+
+
         public Landscape(Game game)
         {
+            int heightMapSide = 257;
+            this.heightMap = new HeightMap(heightMapSide);
             vertices = Buffer.Vertex.New(
                 game.GraphicsDevice,
                 new[]

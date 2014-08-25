@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GameObject.cs" />
+    <Compile Include="HeightMap.cs" />
     <Compile Include="Landscape.cs" />
     <Compile Include="ColoredGameObject.cs" />
     <Compile Include="Project1Game.cs" />
