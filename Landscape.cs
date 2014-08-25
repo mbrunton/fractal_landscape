@@ -15,10 +15,11 @@ namespace Project1
 
         public Landscape(Game game)
         {
-            int heightMapSide = 257;
+            int heightMapSide = 9;
             List<float> corners = new List<float> {0.0f, 0.0f, 0.0f, 0.0f};
             List<float> randRange = new List<float> { -50.0f, 50.0f };
             this.heightMap = new HeightMap(heightMapSide, corners, randRange);
+            Console.WriteLine(this.heightMap);
 
             vertices = Buffer.Vertex.New(
                 game.GraphicsDevice,
