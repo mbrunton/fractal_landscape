@@ -12,18 +12,19 @@ namespace Project1
     {
         private List<List<float>> grid;
         private int sideLength;
+        private List<float> randRange;
         private Random r;
 
-        public HeightMap(int sideLength, List<float> corners, List<float> randRange)
+        public HeightMap(int sideLength, List<float> corners, List<float> randRange, Random r)
         {
             if (!isPow2Plus1(sideLength)) {
                 sideLength = getNextPow2Plus1(sideLength);
             }
             this.sideLength = sideLength;
-            this.grid = new List<List<float>>();
-            this.r = new Random();
+            this.randRange = randRange;
+            this.r = r;
 
-            fillGrid(corners, randRange);
+            fillGrid(corners);
         }
 
         public List<List<float>> getGrid()
@@ -31,18 +32,59 @@ namespace Project1
             return this.grid;
         }
 
+        public List<VertexPositionColor> getVertexList(float minX, float maxX, float minZ, float maxZ, Func<float, List<float>, Color> altitudeToColor)
+        {
+            if (minX >= maxX || minZ >= maxZ)
+            {
+                throw new ArgumentException("must have minX < maxX, and minZ < maxZ");
+            }
+
+            List<VertexPositionColor> tempVertices = new List<VertexPositionColor>();
+            float xStep = (maxX - minX) / (this.sideLength - 1);
+            float zStep = (maxZ - minZ) / (this.sideLength - 1);
+            for (int i = 0; i < this.sideLength; i++)
+            {
+                for (int j = 0; j < this.sideLength; j++)
+                {
+                    float x = minX + i * xStep;
+                    float z = minZ + j * zStep;
+                    float y = this.grid[i][j];
+                    tempVertices.Add(new VertexPositionColor(new Vector3(x, y, z), altitudeToColor(y, randRange)));
+                }
+            }
+
+            // vertices in tempVertices have been added in wrong order for forming triangles
+            List<VertexPositionColor> vertices = new List<VertexPositionColor>(tempVertices.Count());
+            for (int i = 0; i < this.sideLength - 1; i++)
+            {
+                for (int j = 0; j < this.sideLength - 1; j++)
+                {
+                    vertices.Add(tempVertices[i * this.sideLength + j]);
+                    vertices.Add(tempVertices[i * this.sideLength + (j + 1)]);
+                    vertices.Add(tempVertices[(i + 1) * this.sideLength + (j + 1)]);
+                    vertices.Add(tempVertices[i * this.sideLength + j]);
+                    vertices.Add(tempVertices[(i + 1) * this.sideLength + (j + 1)]);
+                    vertices.Add(tempVertices[(i + 1) * this.sideLength + j]);
+                }
+            }
+
+            return vertices;
+        }
+
         /**
          * Using the Diamond-square algorithm
          * note: corner indices 0..4 correspond to: 
          *       top left, bottom left, bottom right, top right
          */
-        private void fillGrid(List<float> corners, List<float> randRange)
+        private void fillGrid(List<float> corners)
         {
-            if (corners.Count() != 4 || randRange.Count() != 2)
+            if (corners.Count() != 4 || this.randRange.Count() != 2)
             {
                 throw new ArgumentException("corners must have 4 elements, and randRange must have 2");
             }
             // fill in corner values
+            this.grid = new List<List<float>>();
+            List<float> randRange = new List<float>() { this.randRange[0], this.randRange[1] };
             for (int i = 0; i < this.sideLength; i++)
             {
                 List<float> row = new List<float>();
@@ -184,43 +226,5 @@ namespace Project1
             return str;
         }
 
-        public List<VertexPositionColor> getVertexList(float minX, float maxX, float minZ, float maxZ, Func<float, Color> altitudeToColor)
-        {
-            if (minX >= maxX || minZ >= maxZ)
-            {
-                throw new ArgumentException("must have minX < maxX, and minZ < maxZ");
-            }
-         
-            List<VertexPositionColor> tempVertices = new List<VertexPositionColor>();
-            float xStep = (maxX - minX) / (this.sideLength - 1);
-            float zStep = (maxZ - minZ) / (this.sideLength - 1);
-            for (int i = 0; i < this.sideLength; i++)
-            {
-                for (int j = 0; j < this.sideLength; j++)
-                {
-                    float x = minX + i * xStep;
-                    float z = minZ + j * zStep;
-                    float y = this.grid[i][j];
-                    tempVertices.Add(new VertexPositionColor(new Vector3(x, y, z), altitudeToColor(z) ));
-                }
-            }
-
-            // vertices in tempVertices have been added in wrong order for forming triangles
-            List<VertexPositionColor> vertices = new List<VertexPositionColor>(tempVertices.Count());
-            for (int i = 0; i < this.sideLength - 1; i++)
-            {
-                for (int j = 0; j < this.sideLength - 1; j++)
-                {
-                    vertices.Add(tempVertices[i * this.sideLength + j]);
-                    vertices.Add(tempVertices[i * this.sideLength + (j+1)]);
-                    vertices.Add(tempVertices[(i+1) * this.sideLength + (j+1)]);
-                    vertices.Add(tempVertices[i * this.sideLength + j]);
-                    vertices.Add(tempVertices[(i+1) * this.sideLength + (j+1)]);
-                    vertices.Add(tempVertices[(i+1) * this.sideLength + j]);
-                }
-            }
-
-            return vertices;
-        }
     }
 }
