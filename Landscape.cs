@@ -25,6 +25,7 @@ namespace Project1
         private float maxVel = 0.03f;
         private float acc = 0.1f;
         private float damping = 0.05f;
+        private float omega = 0.0001f; // rotational velocity
 
         public Landscape(Game game)
         {
@@ -62,10 +63,31 @@ namespace Project1
             this.game = game;
         }
 
-        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState)
+        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, ViewportF viewport)
         {
-            var delta = (float) gameTime.ElapsedGameTime.TotalMilliseconds;
-
+            float delta = (float) gameTime.ElapsedGameTime.TotalMilliseconds;
+            int total = gameTime.TotalGameTime.Milliseconds;
+            
+            // adjust direction
+            float mouseX = mouseState.X;
+            float mouseY = mouseState.Y;
+            
+            if (mouseX < 0 && mouseY > 0f)
+            {
+                if (mouseX < 1f && mouseY < 1f) 
+                {
+                    Console.WriteLine(mouseX);
+                    Vector3 nearPoint = viewport.Unproject(new Vector3(mouseX, mouseY, 0f), basicEffect.Projection, basicEffect.View, basicEffect.World);
+                    Vector3 farPoint = viewport.Unproject(new Vector3(mouseX, mouseY, 1f), basicEffect.Projection, basicEffect.View, basicEffect.World);
+                    Vector3 mouseDir = farPoint - nearPoint;
+                    mouseDir.Normalize();
+                    Vector3 axis = Vector3.Cross(mouseDir, camDir);
+                    Matrix rotation = Matrix.RotationAxis(axis, omega * delta);
+                    camDir = Vector3.TransformCoordinate(camDir, rotation);
+                }
+            }
+            
+            // adjust velocity
             if (keyboardState.IsKeyDown(Keys.W))
             {
                 this.camVel += delta * acc * camDir;
@@ -82,6 +104,7 @@ namespace Project1
             {
                 this.camVel -= delta * acc * Vector3.Cross(camDir, camUp);
             }
+                        
             // speed limit
             if (camVel.Length() > maxVel)
             {

@@ -15,7 +15,7 @@ namespace Project1
         public VertexInputLayout inputLayout;
         public Game game;
 
-        public abstract void Update(GameTime gametime, KeyboardState keyboardState, MouseState mouseState);
+        public abstract void Update(GameTime gametime, KeyboardState keyboardState, MouseState mouseState, ViewportF viewPort);
         public abstract void Draw(GameTime gametime);
     }
 }

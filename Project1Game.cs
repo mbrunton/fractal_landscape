@@ -43,7 +43,6 @@ namespace Project1
         {
             // Creates a graphics manager. This is mandatory.
             graphicsDeviceManager = new GraphicsDeviceManager(this);
-
             keyboardManager = new KeyboardManager(this);
             mouseManager = new MouseManager(this);
 
@@ -70,7 +69,7 @@ namespace Project1
 
         protected override void Update(GameTime gameTime)
         {
-            model.Update(gameTime, keyboardManager.GetState(), mouseManager.GetState());
+            model.Update(gameTime, keyboardManager.GetState(), mouseManager.GetState(), graphicsDeviceManager.GraphicsDevice.Viewport);
 
             // Handle base.Update
             base.Update(gameTime);
