@@ -25,7 +25,12 @@ namespace Project1
         private float maxVel = 0.03f;
         private float acc = 0.1f;
         private float damping = 0.05f;
-        private float omega = 0.0001f; // rotational velocity
+        private float omega = 0.01f; // rotational velocity
+
+        private float oldMouseX = -1;
+        private float oldMouseY = -1;
+        private float minAlpha = 45;
+        private float maxAlpha = 45;
 
         public Landscape(Game game)
         {
@@ -71,21 +76,66 @@ namespace Project1
             // adjust direction
             float mouseX = mouseState.X;
             float mouseY = mouseState.Y;
-            
-            if (mouseX < 0 && mouseY > 0f)
+
+            Matrix rotation = Matrix.Identity;
+            Vector3 leftRightAxis = Vector3.Cross(camDir, camUp); // axis perpendicular to camdir and camup, for rotations up and down
+            Vector3 upDownAxis = Vector3.Cross(leftRightAxis, camDir);
+            float edge = 0.1f;
+            if (oldMouseX >= 0 && oldMouseY >= 0)
             {
-                if (mouseX < 1f && mouseY < 1f) 
+                float diffX = mouseX - oldMouseX;
+                float diffY = mouseY - oldMouseY;
+                float thetaX = delta * omega;
+                float thetaY = -delta * omega;
+                /*
+                if (mouseX < edge)
                 {
-                    Console.WriteLine(mouseX);
-                    Vector3 nearPoint = viewport.Unproject(new Vector3(mouseX, mouseY, 0f), basicEffect.Projection, basicEffect.View, basicEffect.World);
-                    Vector3 farPoint = viewport.Unproject(new Vector3(mouseX, mouseY, 1f), basicEffect.Projection, basicEffect.View, basicEffect.World);
-                    Vector3 mouseDir = farPoint - nearPoint;
-                    mouseDir.Normalize();
-                    Vector3 axis = Vector3.Cross(mouseDir, camDir);
-                    Matrix rotation = Matrix.RotationAxis(axis, omega * delta);
-                    camDir = Vector3.TransformCoordinate(camDir, rotation);
+                    rotation *= Matrix.RotationAxis(upDownAxis, thetaX);
+                } 
+                else if (mouseX > 1-edge) {
+                    rotation *= Matrix.RotationAxis(camUp, thetaX);
                 }
+                if (mouseY < edge) 
+                {
+                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY);
+                } 
+                else if (mouseY > 1-edge) 
+                {
+                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY);
+                }*/
+                if (diffX < 0)
+                {
+                    rotation *= Matrix.RotationAxis(upDownAxis, thetaX * diffX);
+                }
+                else if (diffX > 0)
+                {
+                    rotation *= Matrix.RotationAxis(camUp, thetaX * diffX);
+                }
+                if (diffY < 0)
+                {
+                    // rotate upwards
+                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY * diffY);
+                }
+                else if (diffY > 0)
+                {
+                    // rotate downwards
+                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY * diffY);
+                }
+                camDir = Vector3.TransformCoordinate(camDir, rotation);
+                /*
+                float angle = calcAngle(new Vector3(1,1,0), camDir);
+                if (angle < this.minAlpha)
+                {
+                    camDir = Vector3.TransformCoordinate(camDir, Matrix.RotationAxis(leftRightAxis, this.minAlpha - angle));
+                }
+                else if (angle > this.maxAlpha)
+                {
+                    camDir = Vector3.TransformCoordinate(camDir, Matrix.RotationAxis(leftRightAxis, this.maxAlpha - angle));
+                }
+                 */
             }
+            this.oldMouseX = mouseX;
+            this.oldMouseY = mouseY;
             
             // adjust velocity
             if (keyboardState.IsKeyDown(Keys.W))
@@ -132,6 +182,18 @@ namespace Project1
             // Apply the basic effect technique and draw the rotating cube
             basicEffect.CurrentTechnique.Passes[0].Apply();
             game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
+        }
+
+        private float calcAngle(Vector3 v1, Vector3 v2)
+        {
+            float l1 = v1.Length();
+            float l2 = v2.Length();
+            if (MathUtil.IsZero(l1) || MathUtil.IsZero(l2))
+            {
+                return 0f;
+            }
+
+            return Vector3.Dot(v1, v2) / (l1 * l2);
         }
 
         public Color getColorFromHeight(float y, List<float> randRange)
