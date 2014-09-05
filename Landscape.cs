@@ -18,13 +18,7 @@ namespace Project1
         private float minX, maxX, minZ, maxZ; // (x,z) coordinates of landscape
         private Random r;
 
-        private Vector3 camPos;
-        private Vector3 camDir;
-        private Vector3 camUp;
-        private Vector3 camVel;
-        private float maxVel = 0.03f;
-        private float acc = 0.1f;
-        private float damping = 0.05f;
+        private Camera cam;
 
         public Landscape(Game game)
         {
@@ -38,22 +32,20 @@ namespace Project1
             this.maxX = 30;
             this.minZ = -40;
             this.maxZ = 40;
-            
+
+            //Console.WriteLine(Vector3.Cross(Vector3.UnitX, Vector3.UnitY));
+            //Console.WriteLine(Vector3.TransformCoordinate(Vector3.UnitZ, Matrix.RotationX((float)Math.PI / 4)));
+
             this.vertices = Buffer.Vertex.New(
                 game.GraphicsDevice,
                 this.heightMap.getVertexList(minX, maxX, minZ, maxZ, getColorFromHeight).ToArray());
 
-            this.camPos = new Vector3(0, 70, -10);
-            Vector3 camTarget = new Vector3(0, 0, 0);
-            this.camDir = camTarget - camPos;
-            this.camDir.Normalize();
-            this.camUp = Vector3.UnitY;
-            this.camVel = new Vector3(0, 0, 0);
+            this.cam = new Camera(new Vector3(0, 70, -10), 0f, (float) Math.PI/4.0f, 0f);
 
             basicEffect = new BasicEffect(game.GraphicsDevice)
             {
                 VertexColorEnabled = true,
-                View = Matrix.LookAtLH(camPos, camPos + camDir, camUp),
+                View = Matrix.LookAtLH(cam.getPos(), cam.getTarget(), cam.getUp()),
                 Projection = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, (float)game.GraphicsDevice.BackBuffer.Width / game.GraphicsDevice.BackBuffer.Height, 0.1f, 100.0f),
                 World = Matrix.Identity
             };
@@ -62,51 +54,48 @@ namespace Project1
             this.game = game;
         }
 
-        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState, ViewportF viewport)
+        public override void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState)
         {
             float delta = (float) gameTime.ElapsedGameTime.TotalMilliseconds;
             int total = gameTime.TotalGameTime.Milliseconds;
             
-            // adjust direction
-            float mouseX = mouseState.X;
-            float mouseY = mouseState.Y;
-
-            
+            // adjust direction (pitch and yaw)
+            float deltaMouseX = mouseState.X - 0.5f;
+            float deltaMouseY = mouseState.Y - 0.5f;
+            if (Math.Abs(deltaMouseX) > 0 || Math.Abs(deltaMouseY) > 0)
+            {
+                this.cam.RotateFromMouse(deltaMouseX, deltaMouseY, delta);
+            }
+            // adjust roll
+            if (keyboardState.IsKeyDown(Keys.Q))
+            {
+                this.cam.RollLeft(delta);
+            }
+            if (keyboardState.IsKeyDown(Keys.E)) 
+            {
+                this.cam.RollRight(delta);
+            }
             
             // adjust velocity
             if (keyboardState.IsKeyDown(Keys.W))
             {
-                this.camVel += delta * acc * camDir;
+                this.cam.AccelerateForward(delta);
             }
             if (keyboardState.IsKeyDown(Keys.S))
             {
-                this.camVel -= delta * acc * camDir;
+                this.cam.AccelerateBackward(delta);
             }
             if (keyboardState.IsKeyDown(Keys.A))
             {
-                this.camVel += delta * acc * Vector3.Cross(camDir, camUp);
+                this.cam.AccelerateLeft(delta);
             }
             if (keyboardState.IsKeyDown(Keys.D))
             {
-                this.camVel -= delta * acc * Vector3.Cross(camDir, camUp);
-            }
-                        
-            // speed limit
-            if (camVel.Length() > maxVel)
-            {
-                camVel.Normalize();
-                camVel = Vector3.Multiply(camVel, maxVel);
-            }
-            // damping
-            if (camVel.Length() > 0) 
-            {
-                float dampedSpeed = (1 - damping) * camVel.Length();
-                camVel.Normalize();
-                camVel = Vector3.Multiply(camVel, dampedSpeed);
+                this.cam.AccelerateRight(delta);
             }
 
-            camPos += Vector3.Multiply(camVel, delta);
-            basicEffect.View = Matrix.LookAtLH(camPos, camPos + camDir, camUp);
+            cam.Update(delta);
+            basicEffect.View = Matrix.LookAtLH(cam.getPos(), cam.getTarget(), cam.getUp());
         }
 
         public override void Draw(GameTime gameTime)
@@ -118,18 +107,6 @@ namespace Project1
             // Apply the basic effect technique and draw the rotating cube
             basicEffect.CurrentTechnique.Passes[0].Apply();
             game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
-        }
-
-        private float calcAngle(Vector3 v1, Vector3 v2)
-        {
-            float l1 = v1.Length();
-            float l2 = v2.Length();
-            if (MathUtil.IsZero(l1) || MathUtil.IsZero(l2))
-            {
-                return 0f;
-            }
-
-            return Vector3.Dot(v1, v2) / (l1 * l2);
         }
 
         public Color getColorFromHeight(float y, List<float> randRange)

@@ -35,7 +35,7 @@ namespace Project1
         private GameObject model;
         private KeyboardManager keyboardManager;
         private MouseManager mouseManager;
-        private bool recentreMouse = true;
+        private bool isWindowActive = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Project1Game" /> class.
@@ -70,8 +70,14 @@ namespace Project1
 
         protected override void Update(GameTime gameTime)
         {
-            model.Update(gameTime, keyboardManager.GetState(), mouseManager.GetState(), graphicsDeviceManager.GraphicsDevice.Viewport);
-            if (recentreMouse) {
+            KeyboardState keyboardState = keyboardManager.GetState();
+            MouseState mouseState = mouseManager.GetState();
+            if (keyboardState.IsKeyPressed(Keys.Escape)) {
+                // TODO: find how to deactivate window
+            }
+
+            if (isWindowActive) {
+                model.Update(gameTime, keyboardState, mouseState);
                 mouseManager.SetPosition(new Vector2(0.5f, 0.5f));
             }
             
@@ -92,14 +98,14 @@ namespace Project1
 
         protected override void OnActivated(object sender, EventArgs args)
         {
-            // position mouse in centre of screen
-            recentreMouse = true;
+            // position mouse in centre of screen after each time we update
+            isWindowActive = true;
             base.OnActivated(sender, args);
         }
 
         protected override void OnDeactivated(object sender, EventArgs args)
         {
-            recentreMouse = false;
+            isWindowActive = false;
             base.OnDeactivated(sender, args);
         }
     }
