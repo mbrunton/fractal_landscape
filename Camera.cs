@@ -7,12 +7,13 @@ using SharpDX.Toolkit;
 
 namespace Project1
 {
-    class Camera
+    public class Camera
     {
         private Vector3 pos;
         private Vector3 dir;
         private Vector3 up;
         private Vector3 vel;
+        private Matrix view;
 
         private float acceleration = 0.1f;
         private float dampingAcceleration = 0.05f;
@@ -131,7 +132,9 @@ namespace Project1
                 vel.Normalize();
                 vel = dampedSpeed * vel;
             }
+            // update position and view
             this.pos += delta * vel;
+            this.view = Matrix.LookAtLH(pos, this.getTarget(), up);
         }
 
         public Vector3 getPos()
@@ -152,6 +155,11 @@ namespace Project1
         public Vector3 getUp()
         {
             return this.up;
+        }
+
+        public Matrix getView()
+        {
+            return this.view;
         }
     }
 }

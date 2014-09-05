@@ -32,7 +32,7 @@ namespace Project1
     public class Project1Game : Game
     {
         private GraphicsDeviceManager graphicsDeviceManager;
-        private GameObject model;
+        private World world;
         private KeyboardManager keyboardManager;
         private MouseManager mouseManager;
         private bool isWindowActive = true;
@@ -54,17 +54,14 @@ namespace Project1
 
         protected override void LoadContent()
         {
-            model = new Landscape(this);
-
-            // Create an input layout from the vertices
-
+            world = new World(this);
             base.LoadContent();
         }
 
         protected override void Initialize()
         {
             Window.Title = "Project 1";
-
+            this.Window.AllowUserResizing = true;
             base.Initialize();
         }
 
@@ -77,22 +74,16 @@ namespace Project1
             }
 
             if (isWindowActive) {
-                model.Update(gameTime, keyboardState, mouseState);
+                world.Update(gameTime, keyboardState, mouseState);
                 mouseManager.SetPosition(new Vector2(0.5f, 0.5f));
             }
             
-            // Handle base.Update
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            // Clears the screen with the Color.CornflowerBlue
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            model.Draw(gameTime);
-
-            // Handle base.Draw
+            world.Draw(gameTime);
             base.Draw(gameTime);
         }
 

@@ -90,8 +90,8 @@
     <Compile Include="Camera.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="HeightMap.cs" />
+    <Compile Include="World.cs" />
     <Compile Include="Landscape.cs" />
-    <Compile Include="ColoredGameObject.cs" />
     <Compile Include="Project1Game.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
