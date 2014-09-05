@@ -35,6 +35,7 @@ namespace Project1
         private GameObject model;
         private KeyboardManager keyboardManager;
         private MouseManager mouseManager;
+        private bool recentreMouse = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Project1Game" /> class.
@@ -45,7 +46,7 @@ namespace Project1
             graphicsDeviceManager = new GraphicsDeviceManager(this);
             keyboardManager = new KeyboardManager(this);
             mouseManager = new MouseManager(this);
-
+            
             // Setup the relative directory to the executable directory
             // for loading contents with the ContentManager
             Content.RootDirectory = "Content";
@@ -70,7 +71,10 @@ namespace Project1
         protected override void Update(GameTime gameTime)
         {
             model.Update(gameTime, keyboardManager.GetState(), mouseManager.GetState(), graphicsDeviceManager.GraphicsDevice.Viewport);
-
+            if (recentreMouse) {
+                mouseManager.SetPosition(new Vector2(0.5f, 0.5f));
+            }
+            
             // Handle base.Update
             base.Update(gameTime);
         }
@@ -84,6 +88,19 @@ namespace Project1
 
             // Handle base.Draw
             base.Draw(gameTime);
+        }
+
+        protected override void OnActivated(object sender, EventArgs args)
+        {
+            // position mouse in centre of screen
+            recentreMouse = true;
+            base.OnActivated(sender, args);
+        }
+
+        protected override void OnDeactivated(object sender, EventArgs args)
+        {
+            recentreMouse = false;
+            base.OnDeactivated(sender, args);
         }
     }
 }

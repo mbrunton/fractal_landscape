@@ -25,12 +25,6 @@ namespace Project1
         private float maxVel = 0.03f;
         private float acc = 0.1f;
         private float damping = 0.05f;
-        private float omega = 0.01f; // rotational velocity
-
-        private float oldMouseX = -1;
-        private float oldMouseY = -1;
-        private float minAlpha = 45;
-        private float maxAlpha = 45;
 
         public Landscape(Game game)
         {
@@ -77,65 +71,7 @@ namespace Project1
             float mouseX = mouseState.X;
             float mouseY = mouseState.Y;
 
-            Matrix rotation = Matrix.Identity;
-            Vector3 leftRightAxis = Vector3.Cross(camDir, camUp); // axis perpendicular to camdir and camup, for rotations up and down
-            Vector3 upDownAxis = Vector3.Cross(leftRightAxis, camDir);
-            float edge = 0.1f;
-            if (oldMouseX >= 0 && oldMouseY >= 0)
-            {
-                float diffX = mouseX - oldMouseX;
-                float diffY = mouseY - oldMouseY;
-                float thetaX = delta * omega;
-                float thetaY = -delta * omega;
-                /*
-                if (mouseX < edge)
-                {
-                    rotation *= Matrix.RotationAxis(upDownAxis, thetaX);
-                } 
-                else if (mouseX > 1-edge) {
-                    rotation *= Matrix.RotationAxis(camUp, thetaX);
-                }
-                if (mouseY < edge) 
-                {
-                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY);
-                } 
-                else if (mouseY > 1-edge) 
-                {
-                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY);
-                }*/
-                if (diffX < 0)
-                {
-                    rotation *= Matrix.RotationAxis(upDownAxis, thetaX * diffX);
-                }
-                else if (diffX > 0)
-                {
-                    rotation *= Matrix.RotationAxis(camUp, thetaX * diffX);
-                }
-                if (diffY < 0)
-                {
-                    // rotate upwards
-                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY * diffY);
-                }
-                else if (diffY > 0)
-                {
-                    // rotate downwards
-                    rotation *= Matrix.RotationAxis(leftRightAxis, thetaY * diffY);
-                }
-                camDir = Vector3.TransformCoordinate(camDir, rotation);
-                /*
-                float angle = calcAngle(new Vector3(1,1,0), camDir);
-                if (angle < this.minAlpha)
-                {
-                    camDir = Vector3.TransformCoordinate(camDir, Matrix.RotationAxis(leftRightAxis, this.minAlpha - angle));
-                }
-                else if (angle > this.maxAlpha)
-                {
-                    camDir = Vector3.TransformCoordinate(camDir, Matrix.RotationAxis(leftRightAxis, this.maxAlpha - angle));
-                }
-                 */
-            }
-            this.oldMouseX = mouseX;
-            this.oldMouseY = mouseY;
+            
             
             // adjust velocity
             if (keyboardState.IsKeyDown(Keys.W))
