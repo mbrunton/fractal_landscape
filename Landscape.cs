@@ -12,11 +12,13 @@ namespace Project1
     {
         private Buffer<VertexPositionNormalColor> vertices;
         private HeightMap heightMap;
-        private int gridSize;
+        private float sizePerPoint = 4f; // how much landscape sizelength per diamond-square point
+        private float minSize = 1000f;
+        private float rockiness;
+        private float size;
+        
         private List<List<Square>> squareGrid; // need in addition to vertices (Buffer) so we can search ground height
 
-        private List<float> mapCornerHeights; // initial heights of heightMap corners
-        private List<float> mapRandRange; // range for diamond-square random adjustment
         private float minX, maxX;
         private float minZ, maxZ;
         private float minY, maxY;
@@ -27,17 +29,28 @@ namespace Project1
         private float highlandHeight;
         private float pasturelandHeight;
 
-        public Landscape(Game game, Vector3 ambientLight) : base(game, ambientLight)
+        public Landscape(Game game, Vector3 ambientLight, float rockiness, float size) : base(game, ambientLight)
         {
+            this.rockiness = rockiness; // will determine random numbers in diamond-square
+            this.rockiness = rockiness > 1.0f ? 1.0f : rockiness < 0.0f ? 0.0f : rockiness; // keep in [0, 1]
+            this.size = Math.Max(size, minSize);// side length of landscape square
+
+            int gridSize = (int)(size / sizePerPoint);
+            float maxPossibleHeight = size * rockiness;
+            List<float> altitudeRange = new List<float> { -maxPossibleHeight, maxPossibleHeight };
+            List<float> mapCornerHeights = new List<float> { 0.0f, 0.0f, 0.0f, 0.0f };
+
+            /*
             this.gridSize = 1025;
-            this.mapCornerHeights = new List<float> { 0.0f, 0.0f, 0.0f, 0.0f };
             this.mapRandRange = new List<float> { -100.0f, 400.0f };
-            this.heightMap = new HeightMap(gridSize, mapCornerHeights, mapRandRange);
+            */
+
+            this.heightMap = new HeightMap(gridSize, mapCornerHeights, altitudeRange);
             
-            this.minX = -1000;
-            this.maxX = 1000;
-            this.minZ = -1000;
-            this.maxZ = 1000;
+            this.minX = -size/2;
+            this.maxX = size/2;
+            this.minZ = -size/2;
+            this.maxZ = size/2;
             this.minY = heightMap.getMinHeight();
             this.maxY = heightMap.getMaxHeight();
 
@@ -68,6 +81,20 @@ namespace Project1
             // Apply the basic effect technique and draw
             basicEffect.CurrentTechnique.Passes[0].Apply();
             game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
+        }
+
+        public Vector3 getStartPos()
+        {
+            float startX = 0f;
+            float startZ = 0f;
+            if (startX < minX || startX > maxX || startZ < minZ || startZ > maxZ)
+            {
+                throw new InvalidOperationException("x-z point (0, 0) is outside of landscape");
+            }
+            IndexPair pair = getBoundingSquareVertices(0, 0);
+            float height = getGroundHeight(0, 0, pair).height;
+
+            return new Vector3(startX, height + size/4, startZ);
         }
 
         private List<List<Vector3>> getVertexGridFromGrid(List<List<float>> grid)

@@ -15,6 +15,7 @@ namespace Project1
         private List<GameObject> gameObjects;
         private Landscape landscape;
         private HeavenlyBody sun, moon;
+        private float worldSize;
 
         private Camera cam;
         private Landscape.IndexPair camSquareCoords;
@@ -24,8 +25,12 @@ namespace Project1
         {
             this.game = game;
             this.gameObjects = new List<GameObject>();
+
+            // landscape
             Vector3 ambientLight = new Vector3(0.4f, 0.4f, 0.01f);
-            this.landscape = new Landscape(game, ambientLight);
+            float rockiness = 0.2f;
+            this.worldSize = 4000f;
+            this.landscape = new Landscape(game, ambientLight, rockiness, worldSize);
             gameObjects.Add(landscape);
             
             // sun and moon
@@ -35,7 +40,8 @@ namespace Project1
             this.sun = new HeavenlyBody(initialSunDir, Vector3.UnitX, sunOmega, sunStrength);
             this.moon = new HeavenlyBody(-1 * initialSunDir, Vector3.UnitZ, sunOmega, 0.2f * sunStrength);
 
-            this.camStartPos = new Vector3(0, 70, -10);
+            // camera
+            this.camStartPos = landscape.getStartPos();
             this.cam = new Camera(game, camStartPos, 0f, (float) Math.PI/4.0f, 0f);
             this.camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
             if (camSquareCoords == null)
