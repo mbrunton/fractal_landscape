@@ -24,6 +24,12 @@ namespace Project1
                 Projection = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, (float)game.GraphicsDevice.BackBuffer.Width / game.GraphicsDevice.BackBuffer.Height, 0.1f, 10000.0f),
                 World = Matrix.Identity
             };
+
+            // lighting
+            basicEffect.DirectionalLight0.Enabled = true;
+            basicEffect.DirectionalLight0.DiffuseColor = new Vector3(.2f, .2f, .6f);
+            basicEffect.DirectionalLight0.Direction = new Vector3(0, 10f, 0);
+            basicEffect.SpecularColor = new Vector3(.1f, .2f, .8f);
         }
 
         public void Update(GameTime gametime, KeyboardState keyboardState, MouseState mouseState, Camera cam)

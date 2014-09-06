@@ -91,7 +91,6 @@
     <Compile Include="GameObject.cs" />
     <Compile Include="HeightMap.cs" />
     <Compile Include="Square.cs" />
-    <Compile Include="Triangle.cs" />
     <Compile Include="VertexPositionNormalColor.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

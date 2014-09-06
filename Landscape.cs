@@ -10,7 +10,7 @@ namespace Project1
     using SharpDX.Toolkit.Graphics;
     class Landscape : GameObject
     {
-        private Buffer<VertexPositionColor> vertices;
+        private Buffer<VertexPositionNormalColor> vertices;
         private HeightMap heightMap;
         private int gridSize;
         private List<List<Square>> squareGrid; // need in addition to vertices (Buffer) so we can search ground height
@@ -48,8 +48,8 @@ namespace Project1
             this.highlandHeight = waterLevel + 0.6f * diff;
             this.pasturelandHeight = waterLevel + 0.2f * diff;
 
-            List<List<VertexPositionColor>> vertexGrid = this.heightMap.getVertexGrid(minX, maxX, minZ, maxZ, getColorFromHeight);
-            List<VertexPositionColor> triangularVertexList = getTriangularVertexListFromVertexGrid(vertexGrid);
+            List<List<Vector3>> vertexGrid = getVertexGridFromGrid(heightMap.getGrid());
+            List<VertexPositionNormalColor> triangularVertexList = getTriangularVertexListFromVertexGrid(vertexGrid);
 
             this.squareGrid = getSquareGridFromVertexGrid(vertexGrid);
             this.vertices = Buffer.Vertex.New(
@@ -59,42 +59,59 @@ namespace Project1
             inputLayout = VertexInputLayout.FromBuffer(0, vertices);
         }
 
-        private List<VertexPositionColor> getTriangularVertexListFromVertexGrid(List<List<VertexPositionColor>> vertexGrid)
+        private List<List<Vector3>> getVertexGridFromGrid(List<List<float>> grid)
+        {
+            if (minX >= maxX || minZ >= maxZ)
+            {
+                throw new ArgumentException("must have minX < maxX, and minZ < maxZ");
+            }
+
+            List<List<Vector3>> vertexGrid = new List<List<Vector3>>();
+            float xStep = (maxX - minX) / (grid.Count - 1);
+            float zStep = (maxZ - minZ) / (grid.Count - 1);
+            for (int i = 0; i < grid.Count; i++)
+            {
+                List<Vector3> row = new List<Vector3>();
+                for (int j = 0; j < grid.Count; j++)
+                {
+                    float x = minX + i * xStep;
+                    float z = minZ + j * zStep;
+                    float y = grid[i][j];
+                    row.Add(new Vector3(x, y, z));
+                }
+                vertexGrid.Add(row);
+            }
+
+            return vertexGrid;
+        }
+
+        private List<VertexPositionNormalColor> getTriangularVertexListFromVertexGrid(List<List<Vector3>> vertexGrid)
         {
             // vertices in tempVertices have been added in wrong order for forming triangles
-            List<VertexPositionColor> triangularVertexList = new List<VertexPositionColor>();
+            List<VertexPositionNormalColor> triangularVertexList = new List<VertexPositionNormalColor>();
             for (int i = 0; i < vertexGrid.Count - 1; i++)
             {
                 for (int j = 0; j < vertexGrid[0].Count - 1; j++)
                 {
-                    triangularVertexList.Add(vertexGrid[i][j]);
-                    triangularVertexList.Add(vertexGrid[i][j + 1]);
-                    triangularVertexList.Add(vertexGrid[i + 1][j + 1]);
-                    triangularVertexList.Add(vertexGrid[i][j]);
-                    triangularVertexList.Add(vertexGrid[i + 1][j + 1]);
-                    triangularVertexList.Add(vertexGrid[i + 1][j]);
+                    Vector3 u = vertexGrid[i][j] - vertexGrid[i + 1][j];
+                    Vector3 v = vertexGrid[i][j+1] - vertexGrid[i][j];
+                    Vector3 normal = Vector3.Cross(u, v);
+
+                    VertexPositionNormalColor topleft = new VertexPositionNormalColor(vertexGrid[i][j], normal, getColorFromHeight(vertexGrid[i][j].Y));
+                    VertexPositionNormalColor topright = new VertexPositionNormalColor(vertexGrid[i][j+1], normal, getColorFromHeight(vertexGrid[i][j+1].Y));
+                    VertexPositionNormalColor bottomright = new VertexPositionNormalColor(vertexGrid[i+1][j+1], normal, getColorFromHeight(vertexGrid[i+1][j+1].Y));
+                    VertexPositionNormalColor bottomleft = new VertexPositionNormalColor(vertexGrid[i+1][j], normal, getColorFromHeight(vertexGrid[i+1][j].Y));
+
+                    triangularVertexList.Add(topleft);
+                    triangularVertexList.Add(topright);
+                    triangularVertexList.Add(bottomright);
+                    triangularVertexList.Add(topleft);
+                    triangularVertexList.Add(bottomright);
+                    triangularVertexList.Add(bottomleft);
                 }
             }
 
             return triangularVertexList;
-        }
-
-        private List<List<Triangle>> vertexGridToTriangleGrid(List<List<VertexPositionColor>> vertexGrid)
-        {
-            List<List<Triangle>> triangleGrid = new List<List<Triangle>>();
-            for (int i = 0; i < vertexGrid.Count; i++)
-            {
-                List<Triangle> row = new List<Triangle>();
-                for (int j = 0; j < vertexGrid[0].Count - 3; j += 3)
-                {
-                    VertexPositionColor c1 = vertexGrid[i][j];
-                    VertexPositionColor c2 = vertexGrid[i][j + 1];
-                    VertexPositionColor c3 = vertexGrid[i][j + 2];
-                    row.Add(new Triangle(c1, c2, c3));    
-                }
-                triangleGrid.Add(row);
-            }
-            return triangleGrid;
         }
 
         private List<VertexPositionColor> collapseVertexGridToList(List<List<VertexPositionColor>> grid)
@@ -124,7 +141,7 @@ namespace Project1
             return null;
         }
 
-        private List<List<Square>> getSquareGridFromVertexGrid(List<List<VertexPositionColor>> vertexGrid)
+        private List<List<Square>> getSquareGridFromVertexGrid(List<List<Vector3>> vertexGrid)
         {
             List<List<Square>> squareGrid = new List<List<Square>>();
             for (int i = 0; i < vertexGrid.Count - 1; i++)
@@ -133,10 +150,10 @@ namespace Project1
                 for (int j = 0; j < vertexGrid[0].Count - 1; j++)
                 {
                     // TODO: have this make more sense in HeightMap.GetVertexGrid
-                    Vector3 bottomleft = vertexGrid[i][j].Position;
-                    Vector3 topleft = vertexGrid[i][j + 1].Position;
-                    Vector3 topright = vertexGrid[i + 1][j + 1].Position;
-                    Vector3 bottomright = vertexGrid[i + 1][j].Position;
+                    Vector3 bottomleft = vertexGrid[i][j];
+                    Vector3 topleft = vertexGrid[i][j + 1];
+                    Vector3 topright = vertexGrid[i + 1][j + 1];
+                    Vector3 bottomright = vertexGrid[i + 1][j];
                     row.Add(new Square(topleft, topright, bottomright, bottomleft));
                 }
                 squareGrid.Add(row);

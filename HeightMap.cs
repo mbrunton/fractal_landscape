@@ -32,32 +32,6 @@ namespace Project1
             return this.grid;
         }
 
-        public List<List<VertexPositionColor>> getVertexGrid(float minX, float maxX, float minZ, float maxZ, Func<float, Color> altitudeToColor)
-        {
-            if (minX >= maxX || minZ >= maxZ)
-            {
-                throw new ArgumentException("must have minX < maxX, and minZ < maxZ");
-            }
-
-            List<List<VertexPositionColor>> vertexGrid = new List<List<VertexPositionColor>>();
-            float xStep = (maxX - minX) / (this.sideLength - 1);
-            float zStep = (maxZ - minZ) / (this.sideLength - 1);
-            for (int i = 0; i < this.sideLength; i++)
-            {
-                List<VertexPositionColor> row = new List<VertexPositionColor>();
-                for (int j = 0; j < this.sideLength; j++)
-                {
-                    float x = minX + i * xStep;
-                    float z = minZ + j * zStep;
-                    float y = this.grid[i][j];
-                    row.Add(new VertexPositionColor(new Vector3(x, y, z), altitudeToColor(y)));
-                }
-                vertexGrid.Add(row);
-            }
-
-            return vertexGrid;
-        }
-
         /**
          * Using the Diamond-square algorithm
          * note: corner indices 0..4 correspond to: 
