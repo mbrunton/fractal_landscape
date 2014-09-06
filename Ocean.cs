@@ -29,9 +29,7 @@ namespace Project1
             this.roughness = roughness < 0.0f ? 0.0f : roughness > 1.0f ? 1.0f : roughness;
             this.waveJigglage = roughness * sizePerPoint; // max wave delta y from waterLevel (above and below)
 
-            this.diffuseColor = new Vector3();
-            this.basicEffect.DirectionalLight0.DiffuseColor = this.diffuseColor;
-            this.basicEffect.DirectionalLight1.DiffuseColor = this.diffuseColor;
+            this.setColors(new Vector3(0.2f, 8.0f, 0.4f), 0.9f);
 
             this.vertexGrid = generateVertexGrid();
             this.triangularVertexList = getTriangularVertexListFromVertexGrid(vertexGrid);

@@ -33,11 +33,10 @@ namespace Project1
         {
             // determines how mountainous
             this.rockiness = rockiness > 1.0f ? 1.0f : rockiness < 0.0f ? 0.0f : rockiness; // keep in [0, 1]
-            this.size = size < minSize ? minSize : size > maxSize ? maxSize : size;// side length of landscape square
+            this.size = size < minSize ? minSize : size > maxSize ? maxSize : size; // side length of landscape square
 
-            this.diffuseColor = new Vector3(1f, 1f, 1f);
-            this.basicEffect.DirectionalLight0.DiffuseColor = this.diffuseColor;
-            this.basicEffect.DirectionalLight1.DiffuseColor = this.diffuseColor;
+            this.setColors(new Vector3(0.2f, 0.0f, 0.4f), 0.2f);
+            this.basicEffect.PreferPerPixelLighting = true;
 
             int gridSize = (int)(size / sizePerPoint + 1);
             float maxPossibleHeight = size * rockiness;
