@@ -59,6 +59,17 @@ namespace Project1
             inputLayout = VertexInputLayout.FromBuffer(0, vertices);
         }
 
+        public override void Draw(GameTime gameTime)
+        {
+            // Setup the vertices
+            game.GraphicsDevice.SetVertexBuffer(vertices);
+            game.GraphicsDevice.SetVertexInputLayout(inputLayout);
+
+            // Apply the basic effect technique and draw
+            basicEffect.CurrentTechnique.Passes[0].Apply();
+            game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
+        }
+
         private List<List<Vector3>> getVertexGridFromGrid(List<List<float>> grid)
         {
             if (minX >= maxX || minZ >= maxZ)
@@ -234,17 +245,6 @@ namespace Project1
             }
 
             return pairs;
-        }
-
-        public override void Draw(GameTime gameTime)
-        {
-            // Setup the vertices
-            game.GraphicsDevice.SetVertexBuffer(vertices);
-            game.GraphicsDevice.SetVertexInputLayout(inputLayout);
-
-            // Apply the basic effect technique and draw
-            basicEffect.CurrentTechnique.Passes[0].Apply();
-            game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
         }
 
         private Color getColorFromHeight(float y)
