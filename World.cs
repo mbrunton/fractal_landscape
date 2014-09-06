@@ -11,18 +11,24 @@ namespace Project1
     using SharpDX.Toolkit.Input;
     class World
     {
-        private Landscape landscape;
-        private Camera cam;
-        private List<GameObject> gameObjects;
         private Game game;
-
+        private List<GameObject> gameObjects;
+        private Landscape landscape;
+        
+        private Camera cam;
         private Landscape.IndexPair camSquareCoords;
+        private Vector3 camStartPos;
 
         public World(Game game)
         {
             this.landscape = new Landscape(game);
-            this.cam = new Camera(new Vector3(0, 70, -10), 0f, (float) Math.PI/4.0f, 0f);
+            this.camStartPos = new Vector3(0, 70, -10);
+            this.cam = new Camera(camStartPos, 0f, (float) Math.PI/4.0f, 0f);
             this.camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
+            if (camSquareCoords == null)
+            {
+                throw new InvalidOperationException("camera starts outside of landscape bounds!");
+            }
 
             this.gameObjects = new List<GameObject>();
             gameObjects.Add(landscape);
@@ -80,6 +86,13 @@ namespace Project1
 
             Landscape.HeightIndexPair hip = landscape.getGroundHeight(cam.getPos().X, cam.getPos().Z, camSquareCoords);
             this.camSquareCoords = hip.pair;
+            // check if we've left the landscape
+            if (camSquareCoords == null)
+            {
+                cam.OverridePos(camStartPos);
+                camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
+                hip = landscape.getGroundHeight(cam.getPos().X, cam.getPos().Z, camSquareCoords);
+            }
             
             cam.Update(delta, hip.height);
             foreach (GameObject gameObject in this.gameObjects) {

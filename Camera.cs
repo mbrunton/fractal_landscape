@@ -40,6 +40,11 @@ namespace Project1
             this.Translate(initialPos);
         }
 
+        public void OverridePos(Vector3 newPos)
+        {
+            this.pos = newPos;
+        }
+
         public void Rotate(Matrix rotation) 
         {
             this.dir = Vector3.TransformCoordinate(dir, rotation);

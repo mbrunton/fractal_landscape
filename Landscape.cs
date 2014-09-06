@@ -120,8 +120,8 @@ namespace Project1
                 }
             }
 
-            // can't find it.. just say it's in the middle
-            return new IndexPair(squareGrid.Count / 2, squareGrid[0].Count / 2);
+            // can't find it..
+            return null;
         }
 
         private List<List<Square>> getSquareGridFromVertexGrid(List<List<VertexPositionColor>> vertexGrid)
@@ -159,10 +159,10 @@ namespace Project1
         {
             public float height;
             public IndexPair pair;
-            public HeightIndexPair(float height, int i, int j)
+            public HeightIndexPair(float height, IndexPair pair)
             {
                 this.height = height;
-                this.pair = new IndexPair(i, j);
+                this.pair = pair;
             }
         }
 
@@ -181,13 +181,13 @@ namespace Project1
                     if (squareGrid[i][j].Contains(x, z))
                     {
                         float height = squareGrid[i][j].getMaxY();
-                        return new HeightIndexPair(height, i, j);
+                        return new HeightIndexPair(height, new IndexPair(i, j));
                     }
                 }
                 indexDist++;
             }
 
-            return new HeightIndexPair(0f, squareGrid.Count / 2, squareGrid[0].Count / 2);
+            return new HeightIndexPair(0f, null);
         }
 
         private List<IndexPair> getIndexPairsAtDist(IndexPair pair, int dist, int maxI, int maxJ)
