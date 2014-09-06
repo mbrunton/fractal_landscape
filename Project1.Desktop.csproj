@@ -90,6 +90,10 @@
     <Compile Include="Camera.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="HeightMap.cs" />
+    <Compile Include="Triangle.cs" />
+    <Compile Include="VertexPositionNormalColor.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="World.cs" />
     <Compile Include="Landscape.cs" />
     <Compile Include="Project1Game.cs" />

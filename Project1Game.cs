@@ -61,7 +61,12 @@ namespace Project1
         protected override void Initialize()
         {
             Window.Title = "Project 1";
-            this.Window.AllowUserResizing = true;
+            // fixed window size
+            this.Window.AllowUserResizing = false;
+            graphicsDeviceManager.PreferredBackBufferHeight = 900;
+            graphicsDeviceManager.PreferredBackBufferWidth = 1200;
+            graphicsDeviceManager.ApplyChanges();
+            
             base.Initialize();
         }
 
@@ -70,12 +75,13 @@ namespace Project1
             KeyboardState keyboardState = keyboardManager.GetState();
             MouseState mouseState = mouseManager.GetState();
             if (keyboardState.IsKeyPressed(Keys.Escape)) {
-                // TODO: find how to deactivate window
+                // TODO: find how to just deactivate window
+                this.Exit();
             }
 
             if (isWindowActive) {
                 world.Update(gameTime, keyboardState, mouseState);
-                mouseManager.SetPosition(new Vector2(0.5f, 0.5f));
+                mouseManager.SetPosition(new Vector2(0.5f, 0.5f)); // TODO: bug occurs when resizing
             }
             
             base.Update(gameTime);

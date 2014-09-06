@@ -12,29 +12,80 @@ namespace Project1
     {
         private Buffer<VertexPositionColor> vertices;
         private HeightMap heightMap;
-        private int mapGridSize;
+        private int gridSize;
+        private List<Triangle> triangleList; // need in addition to vertices (Buffer) so we can search ground height
+
+
         private List<float> mapCornerHeights; // initial heights of heightMap corners
         private List<float> mapRandRange; // range for diamond-square random adjustment
-        private float minX, maxX, minZ, maxZ; // (x,z) coordinates of landscape
-        private Random r;
+        private float minX, maxX;
+        private float minZ, maxZ;
+        private float minY, maxY;
+
+        private float waterLevel;
+        private float snowHeight;
+        private float mountainHeight;
+        private float highlandHeight;
+        private float pasturelandHeight;
 
         public Landscape(Game game) : base(game)
         {
-            this.r = new Random();
-            this.mapGridSize = 257;
+            this.gridSize = 1025;
             this.mapCornerHeights = new List<float> { 0.0f, 0.0f, 0.0f, 0.0f };
-            this.mapRandRange = new List<float> { -6.0f, 22.0f };
-            this.heightMap = new HeightMap(mapGridSize, mapCornerHeights, mapRandRange, r);
+            this.mapRandRange = new List<float> { -100.0f, 400.0f };
+            this.heightMap = new HeightMap(gridSize, mapCornerHeights, mapRandRange);
 
-            this.minX = -30;
-            this.maxX = 30;
-            this.minZ = -40;
-            this.maxZ = 40;
+            this.minX = -1000;
+            this.maxX = 1000;
+            this.minZ = -1000;
+            this.maxZ = 1000;
+            this.minY = heightMap.getMinHeight();
+            this.maxY = heightMap.getMaxHeight();
 
+            this.waterLevel = minY + 0.1f * (maxY - minY);
+            float diff = maxY - waterLevel;
+            this.snowHeight = waterLevel + 0.95f * diff;
+            this.mountainHeight = waterLevel + 0.8f * diff;
+            this.highlandHeight = waterLevel + 0.6f * diff;
+            this.pasturelandHeight = waterLevel + 0.2f * diff;
+
+            List<VertexPositionColor> vertexList = this.heightMap.getVertexList(minX, maxX, minZ, maxZ, getColorFromHeight);
+            this.triangleList = vertexListToTriangleList(vertexList);
             this.vertices = Buffer.Vertex.New(
                 game.GraphicsDevice,
-                this.heightMap.getVertexList(minX, maxX, minZ, maxZ, getColorFromHeight).ToArray());
+                vertexList.ToArray());
             inputLayout = VertexInputLayout.FromBuffer(0, vertices);
+        }
+
+        private List<Triangle> vertexListToTriangleList(List<VertexPositionColor> vertexList)
+        {
+            List<Triangle> triangleList = new List<Triangle>();
+            for (int i = 0; i < vertexList.Count - 3; i += 3)
+            {
+                VertexPositionColor c1 = vertexList[i];
+                VertexPositionColor c2 = vertexList[i+1];
+                VertexPositionColor c3 = vertexList[i+2];
+                triangleList.Add(new Triangle(c1, c2, c3));
+            }
+            return triangleList;
+        }
+
+        public float getGroundHeightAtPos(float x, float z)
+        {
+            if (x < minX || x > maxX || z < minZ || z > maxZ)
+            {
+                return 0f;
+            }
+
+            for (int i = 0; i < triangleList.Count; i++)
+            {
+                if (triangleList[i].Contains(x, z))
+                {
+                    return triangleList[i].getMaxY();
+                }
+            }
+
+            return 0f;
         }
 
         public override void Draw(GameTime gameTime)
@@ -48,34 +99,30 @@ namespace Project1
             game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
         }
 
-        public Color getColorFromHeight(float y, List<float> randRange)
+        private Color getColorFromHeight(float y, List<float> randRange)
         {
-            float diff = randRange[1] - randRange[0];
-            float mountainRange = randRange[1] - 0.25f * diff;
-            float hillRange = mountainRange - 0.25f * diff;
-            float valleyRange = hillRange - 0.25f * diff;
-            float waterRange = valleyRange - 0.25f * diff;
-            if (y >= mountainRange)
+            if (y >= snowHeight)
             {
-                return Color.Purple;
+                return Color.Snow;
             }
-            else if (y >= hillRange)
+            if (y >= mountainHeight)
             {
                 return Color.MediumPurple;
             }
-            else if (y >= valleyRange)
+            if (y >= highlandHeight)
             {
-                return Color.ForestGreen;
+                return new Color(94, 128, 43);
             }
-            else if (y >= waterRange)
+            if (y >= pasturelandHeight)
             {
-                return Color.Aqua;
+                return new Color(42, 107, 36);
             }
-            return Color.Brown;
-            //float yp = (float)((Math.Atan(y - randRange[0]) + Math.PI/2) / Math.PI);
-            //float yp = (float)(1 / (1 + Math.Pow(Math.E, y)));
-            //Console.WriteLine(yp);
-            //return new Color(yp*yp, yp, yp*yp*yp);
+            if (y >= waterLevel)
+            {
+                return Color.SandyBrown;
+            }
+
+            return Color.RoyalBlue;
         }
     }
 }

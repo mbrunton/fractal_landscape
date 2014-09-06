@@ -35,7 +35,14 @@ namespace Project1
             // adjust direction (pitch and yaw)
             float deltaMouseX = mouseState.X - 0.5f;
             float deltaMouseY = mouseState.Y - 0.5f;
-            Console.WriteLine(deltaMouseY);
+
+            /*
+            Console.WriteLine("mouseState.X " + mouseState.X.ToString());
+            Console.WriteLine("mouseState.Y " + mouseState.Y.ToString());
+            Console.WriteLine("deltaMouseX " + deltaMouseX.ToString());
+            Console.WriteLine("deltaMouseY " + deltaMouseY.ToString());
+            */
+
             if (Math.Abs(deltaMouseX) > 0 || Math.Abs(deltaMouseY) > 0)
             {
                 this.cam.RotateFromMouse(deltaMouseX, deltaMouseY, delta);

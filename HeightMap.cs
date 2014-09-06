@@ -15,14 +15,14 @@ namespace Project1
         private List<float> randRange;
         private Random r;
 
-        public HeightMap(int sideLength, List<float> corners, List<float> randRange, Random r)
+        public HeightMap(int sideLength, List<float> corners, List<float> randRange)
         {
             if (!isPow2Plus1(sideLength)) {
                 sideLength = getNextPow2Plus1(sideLength);
             }
             this.sideLength = sideLength;
             this.randRange = randRange;
-            this.r = r;
+            this.r = new Random();
 
             fillGrid(corners);
         }
@@ -84,7 +84,7 @@ namespace Project1
             }
             // fill in corner values
             this.grid = new List<List<float>>();
-            List<float> randRange = new List<float>() { this.randRange[0], this.randRange[1] };
+            List<float> randRangeCopy = new List<float>() { this.randRange[0], this.randRange[1] };
             for (int i = 0; i < this.sideLength; i++)
             {
                 List<float> row = new List<float>();
@@ -109,7 +109,7 @@ namespace Project1
                     for (int j = 0; j < this.sideLength - side; j += side)
                     {
                         float average = getAverageOfSquareCorners(i, j, side);
-                        float adjustment = getRandInRange(randRange);
+                        float adjustment = getRandInRange(randRangeCopy);
                         this.grid[i + side / 2][j + side / 2] = average + adjustment;
                     }
                 }
@@ -119,7 +119,7 @@ namespace Project1
                     for (int j = 0; j < this.sideLength; j += side)
                     {
                         float average = getAverageOfDiamondNeighbours(i, j, side);
-                        float adjustment = getRandInRange(randRange);
+                        float adjustment = getRandInRange(randRangeCopy);
                         this.grid[i][j] = average + adjustment;
                     }
                 }
@@ -128,13 +128,13 @@ namespace Project1
                     for (int j = side / 2; j < this.sideLength - side/2; j += side)
                     {
                         float average = getAverageOfDiamondNeighbours(i, j, side);
-                        float adjustment = getRandInRange(randRange);
+                        float adjustment = getRandInRange(randRangeCopy);
                         this.grid[i][j] = average + adjustment;
                     }
                 }
 
-                randRange[0] = randRange[0] / 2.0f;
-                randRange[1] = randRange[1] / 2.0f;
+                randRangeCopy[0] = randRangeCopy[0] / 2.0f;
+                randRangeCopy[1] = randRangeCopy[1] / 2.0f;
                 side = side / 2;
             }
         }
@@ -172,6 +172,35 @@ namespace Project1
             }
             float average = neighbours.Sum() / neighbours.Count();
             return average;
+        }
+
+        public float getMinHeight() {
+            float min = grid[0][0];
+            for (int i = 0; i < sideLength; i++)
+            {
+                for (int j = 0; j < sideLength; j++)
+                {
+                    if (grid[i][j] < min)
+                    {
+                        min = grid[i][j];
+                    }
+                }
+            }
+            return min;
+        }
+        public float getMaxHeight() {
+            float max = grid[0][0];
+            for (int i = 0; i < sideLength; i++)
+            {
+                for (int j = 0; j < sideLength; j++)
+                {
+                    if (grid[i][j] > max)
+                    {
+                        max = grid[i][j];
+                    }
+                }
+            }
+            return max;
         }
 
         /**

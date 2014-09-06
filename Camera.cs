@@ -17,7 +17,7 @@ namespace Project1
 
         private float acceleration = 0.1f;
         private float dampingAcceleration = 0.05f;
-        private float maxVelocity = 0.03f;
+        private float maxVelocity = 0.3f;
         private float omega = 0.4f;   // angular velocity for moving mouse (yaw, pitch)
         private float rollOmega = 0.001f; // angular velocity for rolling
 
