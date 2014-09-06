@@ -28,7 +28,7 @@ namespace Project1
             this.gameObjects = new List<GameObject>();
 
             // landscape
-            Vector3 ambientLight = new Vector3(0.4f, 0.4f, 0.01f);
+            Vector3 ambientLight = 0.1f * Vector3.One;
             float rockiness = 0.2f;
             float size = 4000f;
             this.landscape = new Landscape(game, ambientLight, rockiness, size);
@@ -41,8 +41,8 @@ namespace Project1
             gameObjects.Add(ocean);
             
             // sun and moon
-            float sunOmega = 0.0004f;
-            Vector3 initialSunDir = new Vector3(0, -1, 0);
+            float sunOmega = 0.0002f;
+            Vector3 initialSunDir = Vector3.UnitZ;
             float sunStrength = 0.8f;
             this.sun = new HeavenlyBody(initialSunDir, Vector3.UnitX, sunOmega, sunStrength);
             this.moon = new HeavenlyBody(-1 * initialSunDir, Vector3.UnitZ, sunOmega, 0.2f * sunStrength);

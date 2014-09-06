@@ -12,7 +12,8 @@ namespace Project1
     {
         private HeightMap heightMap;
         private float sizePerPoint = 4f; // how much landscape sizelength per diamond-square point
-        private float minSize = 1000f;
+        private float minSize = 40f;
+        private float maxSize = 8000f;
         private float rockiness;
         private float size;
         
@@ -32,7 +33,11 @@ namespace Project1
         {
             // determines how mountainous
             this.rockiness = rockiness > 1.0f ? 1.0f : rockiness < 0.0f ? 0.0f : rockiness; // keep in [0, 1]
-            this.size = size < minSize ? minSize : size;// side length of landscape square
+            this.size = size < minSize ? minSize : size > maxSize ? maxSize : size;// side length of landscape square
+
+            this.diffuseColor = new Vector3(1f, 1f, 1f);
+            this.basicEffect.DirectionalLight0.DiffuseColor = this.diffuseColor;
+            this.basicEffect.DirectionalLight1.DiffuseColor = this.diffuseColor;
 
             int gridSize = (int)(size / sizePerPoint + 1);
             float maxPossibleHeight = size * rockiness;
@@ -64,6 +69,17 @@ namespace Project1
                 triangularVertexList.ToArray());
             
             inputLayout = VertexInputLayout.FromBuffer(0, vertices);
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            // Setup the vertices
+            game.GraphicsDevice.SetVertexBuffer(vertices);
+            game.GraphicsDevice.SetVertexInputLayout(inputLayout);
+
+            // Apply the basic effect technique and draw
+            basicEffect.CurrentTechnique.Passes[0].Apply();
+            game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
         }
 
         public Vector3 getStartPos()
@@ -238,8 +254,9 @@ namespace Project1
             return pairs;
         }
 
-        public override Color getColorFromHeight(float y)
+        public override Color getColorFromPoint(Vector3 v)
         {
+            float y = v.Y;
             if (y >= snowHeight)
             {
                 return Color.Snow;

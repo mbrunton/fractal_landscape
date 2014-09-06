@@ -15,8 +15,11 @@ namespace Project1
         public BasicEffect basicEffect;
         public VertexInputLayout inputLayout;
         public Game game;
+        
+        protected Vector3 diffuseColor;
+        protected Vector3 specularColor;
 
-        public abstract Color getColorFromHeight(float y);
+        public abstract Color getColorFromPoint(Vector3 pt);
 
         public GameObject(Game game, Vector3 ambientLight)
         {
@@ -33,7 +36,7 @@ namespace Project1
             basicEffect.DirectionalLight0.Enabled = true;
             basicEffect.DirectionalLight1.Enabled = true;
             basicEffect.AmbientLightColor = ambientLight;
-
+            
             /*
             Vector3 diffuseVec = new Vector3(133f, 161f, 54f);
             diffuseVec.Normalize();
@@ -45,7 +48,7 @@ namespace Project1
             */
         }
 
-        public void Update(GameTime gametime, Camera cam, HeavenlyBody sun, HeavenlyBody moon)
+        public virtual void Update(GameTime gametime, Camera cam, HeavenlyBody sun, HeavenlyBody moon)
         {
             // cam
             this.basicEffect.View = cam.getView();
@@ -60,16 +63,7 @@ namespace Project1
             basicEffect.DirectionalLight1.DiffuseColor = moon.getStrength() * Vector3.One;
         }
 
-        public void Draw(GameTime gameTime)
-        {
-            // Setup the vertices
-            game.GraphicsDevice.SetVertexBuffer(vertices);
-            game.GraphicsDevice.SetVertexInputLayout(inputLayout);
-
-            // Apply the basic effect technique and draw
-            basicEffect.CurrentTechnique.Passes[0].Apply();
-            game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
-        }
+        abstract public void Draw(GameTime gameTime);
 
         protected List<VertexPositionNormalColor> getTriangularVertexListFromVertexGrid(List<List<Vector3>> vertexGrid)
         {
@@ -83,10 +77,10 @@ namespace Project1
                     Vector3 v = vertexGrid[i][j + 1] - vertexGrid[i][j];
                     Vector3 normal = Vector3.Cross(u, v);
 
-                    VertexPositionNormalColor topleft = new VertexPositionNormalColor(vertexGrid[i][j], normal, getColorFromHeight(vertexGrid[i][j].Y));
-                    VertexPositionNormalColor topright = new VertexPositionNormalColor(vertexGrid[i][j + 1], normal, getColorFromHeight(vertexGrid[i][j + 1].Y));
-                    VertexPositionNormalColor bottomright = new VertexPositionNormalColor(vertexGrid[i + 1][j + 1], normal, getColorFromHeight(vertexGrid[i + 1][j + 1].Y));
-                    VertexPositionNormalColor bottomleft = new VertexPositionNormalColor(vertexGrid[i + 1][j], normal, getColorFromHeight(vertexGrid[i + 1][j].Y));
+                    VertexPositionNormalColor topleft = new VertexPositionNormalColor(vertexGrid[i][j], normal, getColorFromPoint(vertexGrid[i][j]));
+                    VertexPositionNormalColor topright = new VertexPositionNormalColor(vertexGrid[i][j + 1], normal, getColorFromPoint(vertexGrid[i][j + 1]));
+                    VertexPositionNormalColor bottomright = new VertexPositionNormalColor(vertexGrid[i + 1][j + 1], normal, getColorFromPoint(vertexGrid[i + 1][j + 1]));
+                    VertexPositionNormalColor bottomleft = new VertexPositionNormalColor(vertexGrid[i + 1][j], normal, getColorFromPoint(vertexGrid[i + 1][j]));
 
                     triangularVertexList.Add(topleft);
                     triangularVertexList.Add(topright);
