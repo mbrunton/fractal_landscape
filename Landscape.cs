@@ -27,7 +27,7 @@ namespace Project1
         private float highlandHeight;
         private float pasturelandHeight;
 
-        public Landscape(Game game) : base(game)
+        public Landscape(Game game, Vector3 ambientLight) : base(game, ambientLight)
         {
             this.gridSize = 1025;
             this.mapCornerHeights = new List<float> { 0.0f, 0.0f, 0.0f, 0.0f };

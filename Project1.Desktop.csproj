@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="GameObject.cs" />
+    <Compile Include="HeavenlyBody.cs" />
     <Compile Include="HeightMap.cs" />
     <Compile Include="Square.cs" />
     <Compile Include="VertexPositionNormalColor.cs">

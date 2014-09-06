@@ -13,7 +13,9 @@ namespace Project1
         private Vector3 dir;
         private Vector3 up;
         private Vector3 vel;
+
         private Matrix view;
+        private Matrix projection;
 
         private float acceleration = 0.1f;
         private float dampingAcceleration = 0.05f;
@@ -24,13 +26,16 @@ namespace Project1
         private float contactBuffer = 10f; // so we start to correct slightly before we hit the ground
 
         // angles in radians
-        public Camera(Vector3 initialPos, float yaw, float pitch, float roll)
+        public Camera(Game game, Vector3 initialPos, float yaw, float pitch, float roll)
         {
             // start at origin facing in positive z dir with up being y dir
             this.pos = new Vector3(0, 0, 0);
             this.dir = Vector3.UnitZ;
             this.up = Vector3.UnitY;
             this.vel = new Vector3(0, 0, 0);
+
+            this.view = Matrix.Identity;
+            this.projection = Matrix.PerspectiveFovLH((float)Math.PI / 4.0f, (float)game.GraphicsDevice.BackBuffer.Width / game.GraphicsDevice.BackBuffer.Height, 0.1f, 10000.0f);
 
             Matrix rotation = Matrix.RotationY(yaw); // positive yaw is like turning right
             rotation = rotation * Matrix.RotationX(pitch); // positive pitch is like forwardflipping
@@ -177,6 +182,11 @@ namespace Project1
         public Matrix getView()
         {
             return this.view;
+        }
+
+        public Matrix getProjection()
+        {
+            return this.projection;
         }
     }
 }

@@ -14,26 +14,34 @@ namespace Project1
         private Game game;
         private List<GameObject> gameObjects;
         private Landscape landscape;
-        
+        private HeavenlyBody sun, moon;
+
         private Camera cam;
         private Landscape.IndexPair camSquareCoords;
         private Vector3 camStartPos;
 
         public World(Game game)
         {
-            this.landscape = new Landscape(game);
+            this.game = game;
+            this.gameObjects = new List<GameObject>();
+            Vector3 ambientLight = new Vector3(0.4f, 0.4f, 0.01f);
+            this.landscape = new Landscape(game, ambientLight);
+            gameObjects.Add(landscape);
+            
+            // sun and moon
+            float sunOmega = 0.0008f;
+            Vector3 initialSunDir = new Vector3(0, -1, 0);
+            float sunStrength = 0.8f;
+            this.sun = new HeavenlyBody(initialSunDir, Vector3.UnitX, sunOmega, sunStrength);
+            this.moon = new HeavenlyBody(-1 * initialSunDir, Vector3.UnitZ, sunOmega, 0.2f * sunStrength);
+
             this.camStartPos = new Vector3(0, 70, -10);
-            this.cam = new Camera(camStartPos, 0f, (float) Math.PI/4.0f, 0f);
+            this.cam = new Camera(game, camStartPos, 0f, (float) Math.PI/4.0f, 0f);
             this.camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
             if (camSquareCoords == null)
             {
                 throw new InvalidOperationException("camera starts outside of landscape bounds!");
             }
-
-            this.gameObjects = new List<GameObject>();
-            gameObjects.Add(landscape);
-
-            this.game = game;
         }
 
         public void Update(GameTime gameTime, KeyboardState keyboardState, MouseState mouseState)
@@ -95,8 +103,10 @@ namespace Project1
             }
             
             cam.Update(delta, hip.height);
+            sun.UpdateDir(delta);
+            moon.UpdateDir(delta);
             foreach (GameObject gameObject in this.gameObjects) {
-                gameObject.Update(gameTime, keyboardState, mouseState, cam);
+                gameObject.Update(gameTime, cam, sun, moon);
             }
         }
 
