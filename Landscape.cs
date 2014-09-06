@@ -10,7 +10,6 @@ namespace Project1
     using SharpDX.Toolkit.Graphics;
     class Landscape : GameObject
     {
-        private Buffer<VertexPositionNormalColor> vertices;
         private HeightMap heightMap;
         private float sizePerPoint = 4f; // how much landscape sizelength per diamond-square point
         private float minSize = 1000f;
@@ -31,19 +30,14 @@ namespace Project1
 
         public Landscape(Game game, Vector3 ambientLight, float rockiness, float size) : base(game, ambientLight)
         {
-            this.rockiness = rockiness; // will determine random numbers in diamond-square
+            // determines how mountainous
             this.rockiness = rockiness > 1.0f ? 1.0f : rockiness < 0.0f ? 0.0f : rockiness; // keep in [0, 1]
-            this.size = Math.Max(size, minSize);// side length of landscape square
+            this.size = size < minSize ? minSize : size;// side length of landscape square
 
-            int gridSize = (int)(size / sizePerPoint);
+            int gridSize = (int)(size / sizePerPoint + 1);
             float maxPossibleHeight = size * rockiness;
             List<float> altitudeRange = new List<float> { -maxPossibleHeight, maxPossibleHeight };
             List<float> mapCornerHeights = new List<float> { 0.0f, 0.0f, 0.0f, 0.0f };
-
-            /*
-            this.gridSize = 1025;
-            this.mapRandRange = new List<float> { -100.0f, 400.0f };
-            */
 
             this.heightMap = new HeightMap(gridSize, mapCornerHeights, altitudeRange);
             
@@ -72,17 +66,6 @@ namespace Project1
             inputLayout = VertexInputLayout.FromBuffer(0, vertices);
         }
 
-        public override void Draw(GameTime gameTime)
-        {
-            // Setup the vertices
-            game.GraphicsDevice.SetVertexBuffer(vertices);
-            game.GraphicsDevice.SetVertexInputLayout(inputLayout);
-
-            // Apply the basic effect technique and draw
-            basicEffect.CurrentTechnique.Passes[0].Apply();
-            game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
-        }
-
         public Vector3 getStartPos()
         {
             float startX = 0f;
@@ -97,6 +80,16 @@ namespace Project1
             return new Vector3(startX, height + size/4, startZ);
         }
 
+        public float getWaterLevel()
+        {
+            return this.waterLevel;
+        }
+
+        public float getSize()
+        {
+            return this.size;
+        }
+
         private List<List<Vector3>> getVertexGridFromGrid(List<List<float>> grid)
         {
             if (minX >= maxX || minZ >= maxZ)
@@ -105,7 +98,7 @@ namespace Project1
             }
 
             List<List<Vector3>> vertexGrid = new List<List<Vector3>>();
-            float xStep = (maxX - minX) / (grid.Count - 1);
+            float xStep = (maxX - minX) / (grid.Count - 1); // TODO: pretty sure this is just sizePerPoint but will change when not tired
             float zStep = (maxZ - minZ) / (grid.Count - 1);
             for (int i = 0; i < grid.Count; i++)
             {
@@ -121,35 +114,6 @@ namespace Project1
             }
 
             return vertexGrid;
-        }
-
-        private List<VertexPositionNormalColor> getTriangularVertexListFromVertexGrid(List<List<Vector3>> vertexGrid)
-        {
-            // vertices in tempVertices have been added in wrong order for forming triangles
-            List<VertexPositionNormalColor> triangularVertexList = new List<VertexPositionNormalColor>();
-            for (int i = 0; i < vertexGrid.Count - 1; i++)
-            {
-                for (int j = 0; j < vertexGrid[0].Count - 1; j++)
-                {
-                    Vector3 u = vertexGrid[i][j] - vertexGrid[i + 1][j];
-                    Vector3 v = vertexGrid[i][j+1] - vertexGrid[i][j];
-                    Vector3 normal = Vector3.Cross(u, v);
-
-                    VertexPositionNormalColor topleft = new VertexPositionNormalColor(vertexGrid[i][j], normal, getColorFromHeight(vertexGrid[i][j].Y));
-                    VertexPositionNormalColor topright = new VertexPositionNormalColor(vertexGrid[i][j+1], normal, getColorFromHeight(vertexGrid[i][j+1].Y));
-                    VertexPositionNormalColor bottomright = new VertexPositionNormalColor(vertexGrid[i+1][j+1], normal, getColorFromHeight(vertexGrid[i+1][j+1].Y));
-                    VertexPositionNormalColor bottomleft = new VertexPositionNormalColor(vertexGrid[i+1][j], normal, getColorFromHeight(vertexGrid[i+1][j].Y));
-
-                    triangularVertexList.Add(topleft);
-                    triangularVertexList.Add(topright);
-                    triangularVertexList.Add(bottomright);
-                    triangularVertexList.Add(topleft);
-                    triangularVertexList.Add(bottomright);
-                    triangularVertexList.Add(bottomleft);
-                }
-            }
-
-            return triangularVertexList;
         }
 
         private List<VertexPositionColor> collapseVertexGridToList(List<List<VertexPositionColor>> grid)
@@ -274,7 +238,7 @@ namespace Project1
             return pairs;
         }
 
-        private Color getColorFromHeight(float y)
+        public override Color getColorFromHeight(float y)
         {
             if (y >= snowHeight)
             {

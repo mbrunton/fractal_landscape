@@ -14,6 +14,7 @@ namespace Project1
         private Game game;
         private List<GameObject> gameObjects;
         private Landscape landscape;
+        private Ocean ocean;
         private HeavenlyBody sun, moon;
         private float worldSize;
 
@@ -29,9 +30,15 @@ namespace Project1
             // landscape
             Vector3 ambientLight = new Vector3(0.4f, 0.4f, 0.01f);
             float rockiness = 0.2f;
-            this.worldSize = 4000f;
-            this.landscape = new Landscape(game, ambientLight, rockiness, worldSize);
+            float size = 4000f;
+            this.landscape = new Landscape(game, ambientLight, rockiness, size);
+            this.worldSize = landscape.getSize(); // landscape might have changed "size" variable
             gameObjects.Add(landscape);
+
+            // ocean
+            float oceanRoughness = 0.5f;
+            this.ocean = new Ocean(game, ambientLight, landscape.getWaterLevel(), landscape.getSize(), oceanRoughness);
+            gameObjects.Add(ocean);
             
             // sun and moon
             float sunOmega = 0.0004f;
