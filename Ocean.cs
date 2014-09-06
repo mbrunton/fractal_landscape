@@ -30,6 +30,7 @@ namespace Project1
             this.waveJigglage = roughness * sizePerPoint; // max wave delta y from waterLevel (above and below)
 
             this.setColors(new Vector3(0.2f, 8.0f, 0.4f), 0.9f);
+            this.basicEffect.PreferPerPixelLighting = false;
 
             this.vertexGrid = generateVertexGrid();
             this.triangularVertexList = getTriangularVertexListFromVertexGrid(vertexGrid);

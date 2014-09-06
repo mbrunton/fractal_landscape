@@ -36,7 +36,7 @@ namespace Project1
             this.size = size < minSize ? minSize : size > maxSize ? maxSize : size; // side length of landscape square
 
             this.setColors(new Vector3(0.2f, 0.0f, 0.4f), 0.2f);
-            this.basicEffect.PreferPerPixelLighting = true;
+            this.basicEffect.PreferPerPixelLighting = false;
 
             int gridSize = (int)(size / sizePerPoint + 1);
             float maxPossibleHeight = size * rockiness;

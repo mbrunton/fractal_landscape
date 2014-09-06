@@ -16,6 +16,7 @@ namespace Project1
         private Landscape landscape;
         private Ocean ocean;
         private HeavenlyBody sun, moon;
+
         private float worldSize;
 
         private Camera cam;
@@ -28,7 +29,7 @@ namespace Project1
             this.gameObjects = new List<GameObject>();
 
             // landscape
-            Vector3 ambientLight = 0.1f * Vector3.One;
+            Vector3 ambientLight = 0.3f * Vector3.One;
             float rockiness = 0.2f;
             float size = 4000f;
             this.landscape = new Landscape(game, ambientLight, rockiness, size);
@@ -41,7 +42,7 @@ namespace Project1
             gameObjects.Add(ocean);
             
             // sun and moon
-            float sunOmega = 0.0002f;
+            float sunOmega = 0.0002f / 2;
             Vector3 initialSunDir = Vector3.UnitZ;
             float sunStrength = 0.8f;
             this.sun = new HeavenlyBody(initialSunDir, Vector3.UnitX, sunOmega, sunStrength);
