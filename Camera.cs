@@ -117,7 +117,7 @@ namespace Project1
             this.vel = vel + deltaVel;
         }
 
-        public void Update(float delta)
+        public void Update(float delta, float groundHeight)
         {
             // speed limit
             if (vel.Length() > maxVelocity)
@@ -134,6 +134,11 @@ namespace Project1
             }
             // update position and view
             this.pos += delta * vel;
+            this.pos.Y = Math.Max(pos.Y, groundHeight); // can't go underground
+            /*
+            Console.Write("cam height: " + pos.Y.ToString() + ", ");
+            Console.WriteLine("gnd height: " + groundHeight);
+            */
             this.view = Matrix.LookAtLH(pos, this.getTarget(), up);
         }
 

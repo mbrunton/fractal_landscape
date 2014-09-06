@@ -32,43 +32,30 @@ namespace Project1
             return this.grid;
         }
 
-        public List<VertexPositionColor> getVertexList(float minX, float maxX, float minZ, float maxZ, Func<float, List<float>, Color> altitudeToColor)
+        public List<List<VertexPositionColor>> getVertexGrid(float minX, float maxX, float minZ, float maxZ, Func<float, Color> altitudeToColor)
         {
             if (minX >= maxX || minZ >= maxZ)
             {
                 throw new ArgumentException("must have minX < maxX, and minZ < maxZ");
             }
 
-            List<VertexPositionColor> tempVertices = new List<VertexPositionColor>();
+            List<List<VertexPositionColor>> vertexGrid = new List<List<VertexPositionColor>>();
             float xStep = (maxX - minX) / (this.sideLength - 1);
             float zStep = (maxZ - minZ) / (this.sideLength - 1);
             for (int i = 0; i < this.sideLength; i++)
             {
+                List<VertexPositionColor> row = new List<VertexPositionColor>();
                 for (int j = 0; j < this.sideLength; j++)
                 {
                     float x = minX + i * xStep;
                     float z = minZ + j * zStep;
                     float y = this.grid[i][j];
-                    tempVertices.Add(new VertexPositionColor(new Vector3(x, y, z), altitudeToColor(y, randRange)));
+                    row.Add(new VertexPositionColor(new Vector3(x, y, z), altitudeToColor(y)));
                 }
+                vertexGrid.Add(row);
             }
 
-            // vertices in tempVertices have been added in wrong order for forming triangles
-            List<VertexPositionColor> vertices = new List<VertexPositionColor>(tempVertices.Count());
-            for (int i = 0; i < this.sideLength - 1; i++)
-            {
-                for (int j = 0; j < this.sideLength - 1; j++)
-                {
-                    vertices.Add(tempVertices[i * this.sideLength + j]);
-                    vertices.Add(tempVertices[i * this.sideLength + (j + 1)]);
-                    vertices.Add(tempVertices[(i + 1) * this.sideLength + (j + 1)]);
-                    vertices.Add(tempVertices[i * this.sideLength + j]);
-                    vertices.Add(tempVertices[(i + 1) * this.sideLength + (j + 1)]);
-                    vertices.Add(tempVertices[(i + 1) * this.sideLength + j]);
-                }
-            }
-
-            return vertices;
+            return vertexGrid;
         }
 
         /**

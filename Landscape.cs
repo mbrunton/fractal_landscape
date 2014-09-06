@@ -13,8 +13,7 @@ namespace Project1
         private Buffer<VertexPositionColor> vertices;
         private HeightMap heightMap;
         private int gridSize;
-        private List<Triangle> triangleList; // need in addition to vertices (Buffer) so we can search ground height
-
+        private List<List<Square>> squareGrid; // need in addition to vertices (Buffer) so we can search ground height
 
         private List<float> mapCornerHeights; // initial heights of heightMap corners
         private List<float> mapRandRange; // range for diamond-square random adjustment
@@ -30,15 +29,22 @@ namespace Project1
 
         public Landscape(Game game) : base(game)
         {
-            this.gridSize = 1025;
+            //this.gridSize = 1025;
+            this.gridSize = 5;
             this.mapCornerHeights = new List<float> { 0.0f, 0.0f, 0.0f, 0.0f };
-            this.mapRandRange = new List<float> { -100.0f, 400.0f };
+            //this.mapRandRange = new List<float> { -100.0f, 400.0f };
+            this.mapRandRange = new List<float> { -1.0f, 2.0f };
             this.heightMap = new HeightMap(gridSize, mapCornerHeights, mapRandRange);
-
+            /*
             this.minX = -1000;
             this.maxX = 1000;
             this.minZ = -1000;
             this.maxZ = 1000;
+            */
+            this.minX = -2;
+            this.maxX = 2;
+            this.minZ = -2;
+            this.maxZ = 2;
             this.minY = heightMap.getMinHeight();
             this.maxY = heightMap.getMaxHeight();
 
@@ -49,43 +55,194 @@ namespace Project1
             this.highlandHeight = waterLevel + 0.6f * diff;
             this.pasturelandHeight = waterLevel + 0.2f * diff;
 
-            List<VertexPositionColor> vertexList = this.heightMap.getVertexList(minX, maxX, minZ, maxZ, getColorFromHeight);
-            this.triangleList = vertexListToTriangleList(vertexList);
+            List<List<VertexPositionColor>> vertexGrid = this.heightMap.getVertexGrid(minX, maxX, minZ, maxZ, getColorFromHeight);
+            List<VertexPositionColor> triangularVertexList = getTriangularVertexListFromVertexGrid(vertexGrid);
+
+            this.squareGrid = getSquareGridFromVertexGrid(vertexGrid);
             this.vertices = Buffer.Vertex.New(
                 game.GraphicsDevice,
-                vertexList.ToArray());
+                triangularVertexList.ToArray());
+            
             inputLayout = VertexInputLayout.FromBuffer(0, vertices);
         }
 
-        private List<Triangle> vertexListToTriangleList(List<VertexPositionColor> vertexList)
+        private List<VertexPositionColor> getTriangularVertexListFromVertexGrid(List<List<VertexPositionColor>> vertexGrid)
         {
-            List<Triangle> triangleList = new List<Triangle>();
-            for (int i = 0; i < vertexList.Count - 3; i += 3)
+            // vertices in tempVertices have been added in wrong order for forming triangles
+            List<VertexPositionColor> triangularVertexList = new List<VertexPositionColor>();
+            for (int i = 0; i < vertexGrid.Count - 1; i++)
             {
-                VertexPositionColor c1 = vertexList[i];
-                VertexPositionColor c2 = vertexList[i+1];
-                VertexPositionColor c3 = vertexList[i+2];
-                triangleList.Add(new Triangle(c1, c2, c3));
-            }
-            return triangleList;
-        }
-
-        public float getGroundHeightAtPos(float x, float z)
-        {
-            if (x < minX || x > maxX || z < minZ || z > maxZ)
-            {
-                return 0f;
-            }
-
-            for (int i = 0; i < triangleList.Count; i++)
-            {
-                if (triangleList[i].Contains(x, z))
+                for (int j = 0; j < vertexGrid[0].Count - 1; j++)
                 {
-                    return triangleList[i].getMaxY();
+                    triangularVertexList.Add(vertexGrid[i][j]);
+                    triangularVertexList.Add(vertexGrid[i][j + 1]);
+                    triangularVertexList.Add(vertexGrid[i + 1][j + 1]);
+                    triangularVertexList.Add(vertexGrid[i][j]);
+                    triangularVertexList.Add(vertexGrid[i + 1][j + 1]);
+                    triangularVertexList.Add(vertexGrid[i + 1][j]);
                 }
             }
 
-            return 0f;
+            return triangularVertexList;
+        }
+
+        private List<List<Triangle>> vertexGridToTriangleGrid(List<List<VertexPositionColor>> vertexGrid)
+        {
+            List<List<Triangle>> triangleGrid = new List<List<Triangle>>();
+            for (int i = 0; i < vertexGrid.Count; i++)
+            {
+                List<Triangle> row = new List<Triangle>();
+                for (int j = 0; j < vertexGrid[0].Count - 3; j += 3)
+                {
+                    VertexPositionColor c1 = vertexGrid[i][j];
+                    VertexPositionColor c2 = vertexGrid[i][j + 1];
+                    VertexPositionColor c3 = vertexGrid[i][j + 2];
+                    row.Add(new Triangle(c1, c2, c3));    
+                }
+                triangleGrid.Add(row);
+            }
+            return triangleGrid;
+        }
+
+        private List<VertexPositionColor> collapseVertexGridToList(List<List<VertexPositionColor>> grid)
+        {
+            List<VertexPositionColor> list = new List<VertexPositionColor>();
+            for (int i = 0; i < grid.Count; i++)
+            {
+                list.AddRange(grid[i]);
+            }
+            return list;
+        }
+
+        public IndexPair getBoundingSquareVertices(float x, float z)
+        {
+            for (int i = 0; i < squareGrid.Count; i++)
+            {
+                for (int j = 0; j < squareGrid[0].Count; j++)
+                {
+                    if (squareGrid[i][j].Contains(x, z))
+                    {
+                        return new IndexPair(i, j);
+                    }
+                }
+            }
+
+            return new IndexPair(squareGrid.Count / 2, squareGrid[0].Count / 2);
+        }
+
+        private List<List<Square>> getSquareGridFromVertexGrid(List<List<VertexPositionColor>> vertexGrid)
+        {
+            List<List<Square>> squareGrid = new List<List<Square>>();
+            for (int i = 0; i < vertexGrid.Count - 1; i++)
+            {
+                List<Square> row = new List<Square>();
+                for (int j = 0; j < vertexGrid[0].Count - 1; j++)
+                {
+                    // TODO: have this make more sense in HeightMap.GetVertexGrid
+                    Vector3 bottomleft = vertexGrid[i][j].Position;
+                    Vector3 topleft = vertexGrid[i][j + 1].Position;
+                    Vector3 topright = vertexGrid[i + 1][j + 1].Position;
+                    Vector3 bottomright = vertexGrid[i + 1][j].Position;
+                    row.Add(new Square(topleft, topright, bottomright, bottomleft));
+                }
+                squareGrid.Add(row);
+            }
+
+            return squareGrid;
+        }
+
+        public class IndexPair
+        {
+            public int i, j;
+            public IndexPair(int i, int j)
+            {
+                this.i = i;
+                this.j = j;
+            }
+        }
+        // ground height, plus indices for square in squareGrid
+        public class HeightIndexPair
+        {
+            public float height;
+            public IndexPair pair;
+            public HeightIndexPair(float height, int i, int j)
+            {
+                this.height = height;
+                this.pair = new IndexPair(i, j);
+            }
+        }
+
+        private bool firstCall = true;
+        public HeightIndexPair getGroundHeight(float x, float z, IndexPair oldIndexPair)
+        {
+
+            if (firstCall)
+            {
+                Console.WriteLine("x, z = " + x.ToString() + ", " + z.ToString());
+                Console.WriteLine("old i, j = " + oldIndexPair.i.ToString() + ", " + oldIndexPair.j.ToString());
+            }
+            int indexDist = 0;
+            int maxI = squareGrid.Count - 1;
+            int maxJ = squareGrid[0].Count - 1;
+            while (indexDist < squareGrid.Count)
+            {
+                List<IndexPair> indices = getIndexPairsAtDist(oldIndexPair, indexDist, maxI, maxJ);
+                if (firstCall)
+                {
+                    Console.WriteLine("indexDist = " + indexDist.ToString());
+                }
+                foreach (IndexPair pair in indices)
+                {
+                    int i = pair.i;
+                    int j = pair.j;
+                    if (firstCall)
+                    {
+                        Console.WriteLine("trying i, j = " + i.ToString() + ", " + j.ToString());
+                    }
+                    if (squareGrid[i][j].Contains(x, z))
+                    {
+                        float height = squareGrid[i][j].getMaxY();
+                        return new HeightIndexPair(height, i, j);
+                    }
+                }
+                indexDist++;
+            }
+
+            if (firstCall)
+            {
+                firstCall = false;
+            }
+
+            return new HeightIndexPair(0f, squareGrid.Count / 2, squareGrid[0].Count / 2);
+        }
+
+        private List<IndexPair> getIndexPairsAtDist(IndexPair pair, int dist, int maxI, int maxJ)
+        {
+            int ic = pair.i;
+            int jc = pair.j;
+
+            if (dist == 0)
+            {
+                return new List<IndexPair> { new IndexPair(ic, jc) };
+            }
+
+            // want all 2-tuple integers (i, j) that form square "ring" around (ic, jc), with radius==dist
+            List<IndexPair> pairs = new List<IndexPair>();
+            int i, j;
+            // top and bottom of square ring
+            for (j = Math.Max(0, jc - dist); j <= Math.Min(maxJ, jc + dist); j++)
+            {
+                pairs.Add(new IndexPair(Math.Max(0, ic - dist), j));
+                pairs.Add(new IndexPair(Math.Min(maxI, ic + dist), j));
+            }
+            // left and right
+            for (i = Math.Max(0, ic - (dist - 1)); i <= Math.Min(maxI, ic + (dist - 1)); i++)
+            {
+                pairs.Add(new IndexPair(i, Math.Max(0, jc - dist)));
+                pairs.Add(new IndexPair(i, Math.Min(maxJ, jc + dist)));
+            }
+
+            return pairs;
         }
 
         public override void Draw(GameTime gameTime)
@@ -99,7 +256,7 @@ namespace Project1
             game.GraphicsDevice.Draw(PrimitiveType.TriangleList, vertices.ElementCount);
         }
 
-        private Color getColorFromHeight(float y, List<float> randRange)
+        private Color getColorFromHeight(float y)
         {
             if (y >= snowHeight)
             {

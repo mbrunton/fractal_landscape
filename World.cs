@@ -16,11 +16,15 @@ namespace Project1
         private List<GameObject> gameObjects;
         private Game game;
 
+        private Landscape.IndexPair camSquareCoords;
+
         public World(Game game)
         {
             this.landscape = new Landscape(game);
-            this.cam = new Camera(new Vector3(0, 70, -10), 0f, (float) Math.PI/4.0f, 0f);
-            
+            //this.cam = new Camera(new Vector3(0, 70, -10), 0f, (float) Math.PI/4.0f, 0f);
+            this.cam = new Camera(new Vector3(0, 2, -1), 0f, (float)Math.PI / 4.0f, 0f);
+            this.camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
+
             this.gameObjects = new List<GameObject>();
             gameObjects.Add(landscape);
 
@@ -75,7 +79,10 @@ namespace Project1
                 this.cam.AccelerateRight(delta);
             }
 
-            cam.Update(delta);
+            Landscape.HeightIndexPair hip = landscape.getGroundHeight(cam.getPos().X, cam.getPos().Z, camSquareCoords);
+            this.camSquareCoords = hip.pair;
+            
+            cam.Update(delta, hip.height);
             foreach (GameObject gameObject in this.gameObjects) {
                 gameObject.Update(gameTime, keyboardState, mouseState, cam);
             }
