@@ -29,7 +29,7 @@ namespace Project1
             gameObjects.Add(landscape);
             
             // sun and moon
-            float sunOmega = 0.0008f;
+            float sunOmega = 0.0004f;
             Vector3 initialSunDir = new Vector3(0, -1, 0);
             float sunStrength = 0.8f;
             this.sun = new HeavenlyBody(initialSunDir, Vector3.UnitX, sunOmega, sunStrength);
@@ -113,12 +113,44 @@ namespace Project1
         public void Draw(GameTime gameTime)
         {
             // Clears the screen with the Color.CornflowerBlue
-            game.GraphicsDevice.Clear(Color.CornflowerBlue);
+            game.GraphicsDevice.Clear(getSkyColor());
 
             foreach (GameObject gameObject in this.gameObjects)
             {
                 gameObject.Draw(gameTime);
             }
+        }
+
+        private Color getSkyColor()
+        {
+            Vector3 midday = new Vector3(0, -1, 0);
+            float cos = Vector3.Dot(midday, sun.getDir()) / (midday.Length() * sun.getDir().Length());
+
+            // cos == 1 -> midday, cos == -1 -> midnight, cos == 0 -> dawn/dusk
+            cos = (cos + 1) / 2; // now in [0, 1]
+            return new Color((float)Math.Min(1/Math.Abs(cos), 0.2), (float)Math.Pow(cos, 2), (float)Math.Max(cos, 0.4));
+
+            /*
+            float daytimeCos = 0.2f;
+            Color dayTimeColor = new Color(110f/256f, 155f/256f, 207f/256f);
+            float nighttimeCos = -0.05f;
+            Color nightTimeColor = new Color(52f/256f, 33f/256f, 98f/256f);
+            Color duskDawnColor = new Color(177f/256f, 93f/256f, 59f/256f);
+            Color skyColor;
+            if (cos > daytimeCos)
+            {
+                skyColor = dayTimeColor * cos;
+            }
+            else if (cos < nighttimeCos) 
+            {
+                skyColor = nightTimeColor * (1 - cos);
+            }
+            else 
+            {
+                skyColor = duskDawnColor * cos;
+            }
+            return skyColor;
+            */
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Project1
             this.minY = heightMap.getMinHeight();
             this.maxY = heightMap.getMaxHeight();
 
-            this.waterLevel = minY + 0.1f * (maxY - minY);
+            this.waterLevel = minY + 0.3f * (maxY - minY);
             float diff = maxY - waterLevel;
             this.snowHeight = waterLevel + 0.95f * diff;
             this.mountainHeight = waterLevel + 0.8f * diff;
