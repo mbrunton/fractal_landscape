@@ -21,8 +21,7 @@ namespace Project1
         public World(Game game)
         {
             this.landscape = new Landscape(game);
-            //this.cam = new Camera(new Vector3(0, 70, -10), 0f, (float) Math.PI/4.0f, 0f);
-            this.cam = new Camera(new Vector3(0, 2, -1), 0f, (float)Math.PI / 4.0f, 0f);
+            this.cam = new Camera(new Vector3(0, 70, -10), 0f, (float) Math.PI/4.0f, 0f);
             this.camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
 
             this.gameObjects = new List<GameObject>();

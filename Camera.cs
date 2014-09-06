@@ -21,6 +21,8 @@ namespace Project1
         private float omega = 0.4f;   // angular velocity for moving mouse (yaw, pitch)
         private float rollOmega = 0.001f; // angular velocity for rolling
 
+        private float contactBuffer = 10f; // so we start to correct slightly before we hit the ground
+
         // angles in radians
         public Camera(Vector3 initialPos, float yaw, float pitch, float roll)
         {
@@ -132,9 +134,14 @@ namespace Project1
                 vel.Normalize();
                 vel = dampedSpeed * vel;
             }
-            // update position and view
+
             this.pos += delta * vel;
-            this.pos.Y = Math.Max(pos.Y, groundHeight); // can't go underground
+            // can't go underground
+            if (pos.Y - contactBuffer <= groundHeight)
+            {
+                pos.Y = groundHeight + contactBuffer;
+            }
+
             /*
             Console.Write("cam height: " + pos.Y.ToString() + ", ");
             Console.WriteLine("gnd height: " + groundHeight);

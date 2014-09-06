@@ -29,22 +29,15 @@ namespace Project1
 
         public Landscape(Game game) : base(game)
         {
-            //this.gridSize = 1025;
-            this.gridSize = 5;
+            this.gridSize = 1025;
             this.mapCornerHeights = new List<float> { 0.0f, 0.0f, 0.0f, 0.0f };
-            //this.mapRandRange = new List<float> { -100.0f, 400.0f };
-            this.mapRandRange = new List<float> { -1.0f, 2.0f };
+            this.mapRandRange = new List<float> { -100.0f, 400.0f };
             this.heightMap = new HeightMap(gridSize, mapCornerHeights, mapRandRange);
-            /*
+            
             this.minX = -1000;
             this.maxX = 1000;
             this.minZ = -1000;
             this.maxZ = 1000;
-            */
-            this.minX = -2;
-            this.maxX = 2;
-            this.minZ = -2;
-            this.maxZ = 2;
             this.minY = heightMap.getMinHeight();
             this.maxY = heightMap.getMaxHeight();
 
@@ -127,6 +120,7 @@ namespace Project1
                 }
             }
 
+            // can't find it.. just say it's in the middle
             return new IndexPair(squareGrid.Count / 2, squareGrid[0].Count / 2);
         }
 
@@ -172,33 +166,18 @@ namespace Project1
             }
         }
 
-        private bool firstCall = true;
         public HeightIndexPair getGroundHeight(float x, float z, IndexPair oldIndexPair)
         {
-
-            if (firstCall)
-            {
-                Console.WriteLine("x, z = " + x.ToString() + ", " + z.ToString());
-                Console.WriteLine("old i, j = " + oldIndexPair.i.ToString() + ", " + oldIndexPair.j.ToString());
-            }
             int indexDist = 0;
             int maxI = squareGrid.Count - 1;
             int maxJ = squareGrid[0].Count - 1;
             while (indexDist < squareGrid.Count)
             {
                 List<IndexPair> indices = getIndexPairsAtDist(oldIndexPair, indexDist, maxI, maxJ);
-                if (firstCall)
-                {
-                    Console.WriteLine("indexDist = " + indexDist.ToString());
-                }
                 foreach (IndexPair pair in indices)
                 {
                     int i = pair.i;
                     int j = pair.j;
-                    if (firstCall)
-                    {
-                        Console.WriteLine("trying i, j = " + i.ToString() + ", " + j.ToString());
-                    }
                     if (squareGrid[i][j].Contains(x, z))
                     {
                         float height = squareGrid[i][j].getMaxY();
@@ -206,11 +185,6 @@ namespace Project1
                     }
                 }
                 indexDist++;
-            }
-
-            if (firstCall)
-            {
-                firstCall = false;
             }
 
             return new HeightIndexPair(0f, squareGrid.Count / 2, squareGrid[0].Count / 2);

@@ -13,17 +13,17 @@ namespace Project1
         private float minZ, maxZ;
         private float y1, y2, y3, y4;
 
-        public Square(Vector3 topleft, Vector3 topright, Vector3 bottomright, Vector3 bottomleft)
+        public Square(Vector3 c1, Vector3 c2, Vector3 c3, Vector3 c4)
         {
-            this.minX = topleft.X;
-            this.maxX = topright.X;
-            this.minZ = bottomleft.Z;
-            this.maxZ = topleft.Z;
+            this.minX = Math.Min(c1.X, Math.Min(c2.X, Math.Min(c3.X, c4.X)));
+            this.maxX = Math.Max(c1.X, Math.Max(c2.X, Math.Max(c3.X, c4.X)));
+            this.minZ = Math.Min(c1.Z, Math.Min(c2.Z, Math.Min(c3.Z, c4.Z)));
+            this.maxZ = Math.Max(c1.Z, Math.Max(c2.Z, Math.Max(c3.Z, c4.Z)));
 
-            this.y1 = topleft.Y;
-            this.y2 = topright.Y;
-            this.y3 = bottomright.Y;
-            this.y4 = bottomleft.Y;
+            this.y1 = c1.Y;
+            this.y2 = c2.Y;
+            this.y3 = c3.Y;
+            this.y4 = c4.Y;
         }
 
         public bool Contains(float x, float z) {

@@ -72,6 +72,7 @@ namespace Project1
             // fill in corner values
             this.grid = new List<List<float>>();
             List<float> randRangeCopy = new List<float>() { this.randRange[0], this.randRange[1] };
+            
             for (int i = 0; i < this.sideLength; i++)
             {
                 List<float> row = new List<float>();
