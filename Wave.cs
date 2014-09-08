@@ -14,6 +14,7 @@ namespace Project1
         private float jigglage;
         private float omega;
         private bool movingWaves;
+        private Vector3 waveCentre;
         private Func<Vector3, Color> oceanGetColorFromPoint;
 
         public Wave(Game game, Vector3 ambientLight, List<VertexPositionNormalColor> vs, float thetaOffset, float jigglage, float omega, bool movingWaves, Func<Vector3, Color> oceanGetColorFromPoint) 
@@ -28,10 +29,27 @@ namespace Project1
             this.setColors(new Vector3(0.2f, 8.0f, 0.4f), 0.9f);
             this.basicEffect.PreferPerPixelLighting = false;
 
+            this.waveCentre = getWaveCentreFromVPNCs(vs);
+
             this.vertices = Buffer.Vertex.New(
                 game.GraphicsDevice,
                 vs.ToArray());
             inputLayout = VertexInputLayout.FromBuffer(0, vertices);
+        }
+
+        private Vector3 getWaveCentreFromVPNCs(List<VertexPositionNormalColor> vs) 
+        {
+            if (vs.Count == 0)
+            {
+                throw new ArgumentException("wave cannot have zero vertices");
+            }
+            Vector3 centre = Vector3.Zero;
+            foreach (VertexPositionNormalColor v in vs)
+            {
+                centre = centre + v.Position;
+            }
+            centre = (1.0f / vs.Count) * centre;
+            return centre;
         }
 
         public override void Update(GameTime gametime, Camera cam, HeavenlyBody sun, HeavenlyBody moon)
@@ -40,8 +58,12 @@ namespace Project1
             
             if (movingWaves)
             {
-                // TODO
-                this.basicEffect.World = Matrix.Identity;
+                // TODO: fix this plz
+                Matrix translation = Matrix.Translation(waveCentre);
+                Matrix inverseTranslation = Matrix.Translation(-1 * waveCentre);
+                inverseTranslation.Invert();
+                Matrix rotation = Matrix.RotationAxis(Vector3.UnitX, jigglage * (float)Math.Cos(total * omega + thetaOffset));
+                this.basicEffect.World = inverseTranslation * rotation * translation;
             }
             else
             {

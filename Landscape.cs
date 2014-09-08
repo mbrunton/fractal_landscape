@@ -89,7 +89,7 @@ namespace Project1
             {
                 throw new InvalidOperationException("x-z point (0, 0) is outside of landscape");
             }
-            IndexPair pair = getBoundingSquareVertices(0, 0);
+            IndexPair pair = getBoundingSquareIndices(0, 0);
             float height = getGroundHeight(0, 0, pair).height;
 
             return new Vector3(startX, height + size/4, startZ);
@@ -141,7 +141,7 @@ namespace Project1
             return list;
         }
 
-        public IndexPair getBoundingSquareVertices(float x, float z)
+        public IndexPair getBoundingSquareIndices(float x, float z)
         {
             for (int i = 0; i < squareGrid.Count; i++)
             {

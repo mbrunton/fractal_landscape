@@ -63,8 +63,9 @@ namespace Project1
             Window.Title = "Project 1";
             // fixed window size
             this.Window.AllowUserResizing = false;
-            graphicsDeviceManager.PreferredBackBufferHeight = 900;
-            graphicsDeviceManager.PreferredBackBufferWidth = 1200;
+            //graphicsDeviceManager.PreferredBackBufferHeight = 900;
+            //graphicsDeviceManager.PreferredBackBufferWidth = 1200;
+            graphicsDeviceManager.IsFullScreen = true;
             graphicsDeviceManager.ApplyChanges();
             
             base.Initialize();

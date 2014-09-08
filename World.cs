@@ -42,7 +42,7 @@ namespace Project1
             gameObjects.Add(ocean);
             
             // sun and moon
-            float sunOmega = 0.0002f / 2;
+            float sunOmega = 0.0004f;
             Vector3 initialSunDir = Vector3.UnitZ;
             float sunStrength = 0.8f;
             this.sun = new HeavenlyBody(initialSunDir, Vector3.UnitX, sunOmega, sunStrength);
@@ -51,7 +51,7 @@ namespace Project1
             // camera
             this.camStartPos = landscape.getStartPos();
             this.cam = new Camera(game, camStartPos, 0f, (float) Math.PI/4.0f, 0f);
-            this.camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
+            this.camSquareCoords = landscape.getBoundingSquareIndices(cam.getPos().X, cam.getPos().Z);
             if (camSquareCoords == null)
             {
                 throw new InvalidOperationException("camera starts outside of landscape bounds!");
@@ -112,7 +112,7 @@ namespace Project1
             if (camSquareCoords == null)
             {
                 cam.OverridePos(camStartPos);
-                camSquareCoords = landscape.getBoundingSquareVertices(cam.getPos().X, cam.getPos().Z);
+                camSquareCoords = landscape.getBoundingSquareIndices(cam.getPos().X, cam.getPos().Z);
                 hip = landscape.getGroundHeight(cam.getPos().X, cam.getPos().Z, camSquareCoords);
             }
             

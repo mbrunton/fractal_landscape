@@ -29,7 +29,7 @@ namespace Project1
             roughness = roughness < 0.0f ? 0.0f : roughness > 1.0f ? 1.0f : roughness;
             this.waveJigglage = roughness * sizePerPoint; // max wave delta y from waterLevel (above and below)
 
-            this.movingWaves = true; // Set to false for static ocean
+            this.movingWaves = false; // Set to true/false for wavey/static ocean
 
             this.vertexGrid = generateVertexGrid();
             this.triangularVertexList = getTriangularVertexListFromVertexGrid(vertexGrid);
