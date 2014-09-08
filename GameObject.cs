@@ -15,12 +15,14 @@ namespace Project1
         public BasicEffect basicEffect;
         public VertexInputLayout inputLayout;
         public Game game;
+        public Vector3 ambientLight;
 
         public abstract Color getColorFromPoint(Vector3 pt);
 
         public GameObject(Game game, Vector3 ambientLight)
         {
             this.game = game;
+            this.ambientLight = ambientLight;
             basicEffect = new BasicEffect(game.GraphicsDevice)
             {
                 VertexColorEnabled = true,
@@ -33,9 +35,6 @@ namespace Project1
             basicEffect.DirectionalLight0.Enabled = true;
             basicEffect.DirectionalLight1.Enabled = true;
             basicEffect.AmbientLightColor = ambientLight;
-
-            // shading
-
         }
 
         protected void setColors(Vector3 diffuseColor, float specularity)
