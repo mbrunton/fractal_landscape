@@ -11,7 +11,7 @@ namespace Project1
     class Landscape : GameObject
     {
         private HeightMap heightMap;
-        private float sizePerPoint = 4f; // how much landscape sizelength per diamond-square point
+        private float sizePerPoint = 8f; // how much landscape sizelength per diamond-square point
         private float minSize = 40f;
         private float maxSize = 8000f;
         private float rockiness;
@@ -29,7 +29,7 @@ namespace Project1
         private float highlandHeight;
         private float pasturelandHeight;
 
-        public Landscape(Game game, Vector3 ambientLight, float rockiness, float size) : base(game, ambientLight)
+        public Landscape(Game game, Vector3 ambientLight, bool isRound, float rockiness, float size) : base(game, ambientLight, isRound)
         {
             // determines how mountainous
             this.rockiness = rockiness > 1.0f ? 1.0f : rockiness < 0.0f ? 0.0f : rockiness; // keep in [0, 1]

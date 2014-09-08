@@ -22,7 +22,7 @@ namespace Project1
         private List<VertexPositionNormalColor> triangularVertexList;
 
         public Ocean(Game game, Vector3 ambientLight, float waterLevel, float worldSize, float roughness)
-            : base(game, ambientLight)
+            : base(game, ambientLight, false)
         {
             this.waterLevel = waterLevel;
             this.size = 2 * worldSize;

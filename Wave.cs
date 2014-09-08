@@ -18,7 +18,7 @@ namespace Project1
         private Func<Vector3, Color> oceanGetColorFromPoint;
 
         public Wave(Game game, Vector3 ambientLight, List<VertexPositionNormalColor> vs, float thetaOffset, float jigglage, float omega, bool movingWaves, Func<Vector3, Color> oceanGetColorFromPoint) 
-            : base(game, ambientLight)
+            : base(game, ambientLight, false)
         {
             this.thetaOffset = thetaOffset;
             this.jigglage = jigglage;

@@ -40,8 +40,12 @@ Settings/Performance:
 If performance is an issue, please adjust the "size" float within the World
 constructor (landscape section), which is passed to the Landscape constructor,
 to a lower value.
+If you don't want to sacrifice size, turn up Landscape.sizePerPoint for
+fewer land polygons per unit area.
 Feel free to adjust the rockiness float (same location) to a different
 value to experience different levels of rockiness.
+Also feel free to change roundedLandscape to false within World's constructor,
+to experience a cool retro feel.
 If the full screen annoys you, please alter GraphicsDevice.IsFullScreen
 within Project1Game.Initialize, and uncomment the two lines setting
 the backbuffer width/height. Please don't alter the line preventing window

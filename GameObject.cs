@@ -16,13 +16,16 @@ namespace Project1
         public VertexInputLayout inputLayout;
         public Game game;
         public Vector3 ambientLight;
+        protected bool isRound;
 
         public abstract Color getColorFromPoint(Vector3 pt);
 
-        public GameObject(Game game, Vector3 ambientLight)
+        public GameObject(Game game, Vector3 ambientLight, bool isRound)
         {
             this.game = game;
             this.ambientLight = ambientLight;
+            this.isRound = isRound;
+
             basicEffect = new BasicEffect(game.GraphicsDevice)
             {
                 VertexColorEnabled = true,
@@ -65,6 +68,18 @@ namespace Project1
         abstract public void Draw(GameTime gameTime);
 
         protected List<VertexPositionNormalColor> getTriangularVertexListFromVertexGrid(List<List<Vector3>> vertexGrid)
+        {
+            if (this.isRound)
+            {
+                return getRoundedTriangularVertexListFromVertexGrid(vertexGrid);
+            }
+            else
+            {
+                return getFlatTriangularVertexListFromVertexGrid(vertexGrid);
+            }
+        }
+
+        protected List<VertexPositionNormalColor> getRoundedTriangularVertexListFromVertexGrid(List<List<Vector3>> vertexGrid)
         {
             List<List<Vector3>> normalGrid = new List<List<Vector3>>();
             for (int i = 0; i < vertexGrid.Count; i++)
@@ -127,10 +142,11 @@ namespace Project1
                 }
             }
 
+            return triangularVertexList;
+        }
 
-            
-            // vertices in tempVertices have been added in wrong order for forming triangles
-            /*
+        protected List<VertexPositionNormalColor> getFlatTriangularVertexListFromVertexGrid(List<List<Vector3>> vertexGrid) {
+                        
             List<VertexPositionNormalColor> triangularVertexList = new List<VertexPositionNormalColor>();
             for (int i = 0; i < vertexGrid.Count - 1; i++)
             {
@@ -152,7 +168,7 @@ namespace Project1
                     triangularVertexList.Add(bottomright);
                     triangularVertexList.Add(bottomleft);
                 }
-            }*/
+            }
 
             return triangularVertexList;
         }

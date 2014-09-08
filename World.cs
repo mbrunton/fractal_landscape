@@ -32,7 +32,8 @@ namespace Project1
             Vector3 ambientLight = 0.3f * Vector3.One;
             float rockiness = 0.2f;
             float size = 4000f;
-            this.landscape = new Landscape(game, ambientLight, rockiness, size);
+            bool roundedLandscape = true; // change to false for flatshading!
+            this.landscape = new Landscape(game, ambientLight, roundedLandscape, rockiness, size);
             this.worldSize = landscape.getSize(); // landscape might have changed "size" variable
             gameObjects.Add(landscape);
 
